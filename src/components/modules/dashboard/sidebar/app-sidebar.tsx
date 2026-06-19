@@ -2,14 +2,16 @@
 
 import * as React from "react";
 import {
-  Bot,
-  Frame,
-  LifeBuoy,
-  Map,
-  PieChart,
-  Send,
-  Settings,
-  SquareTerminal,
+  LayoutDashboard,
+  ShoppingBag,
+  Heart,
+  MessageSquare,
+  UserCog,
+  Users,
+  Store,
+  Layers,
+  Tag,
+  Sparkles,
 } from "lucide-react";
 
 import {
@@ -25,79 +27,95 @@ import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
 import Link from "next/link";
 import Logo from "@/assets/svgs/Logo";
-
-const data = {
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "/user/dashboard",
-      icon: SquareTerminal,
-      isActive: true,
-    },
-    {
-      title: "Shop",
-      url: "/user/shop/all-products",
-      icon: Bot,
-      items: [
-        {
-          title: "Manage Products",
-          url: "/user/shop/products",
-        },
-        {
-          title: "Manage Categories",
-          url: "/user/shop/category",
-        },
-        {
-          title: "Manage Brands",
-          url: "/user/shop/brand",
-        },
-      ],
-    },
-
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings,
-      items: [
-        {
-          title: "Profile",
-          url: "/profile",
-        },
-      ],
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Support",
-      url: "#",
-      icon: LifeBuoy,
-    },
-    {
-      title: "Feedback",
-      url: "#",
-      icon: Send,
-    },
-  ],
-  projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
-    },
-  ],
-};
+import { useUser } from "@/context/UserContext";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { user } = useUser();
+  const role = user?.role || "user";
+
+  const adminMenu = [
+    {
+      title: "Overview",
+      url: "/admin/dashboard",
+      icon: LayoutDashboard,
+    },
+    {
+      title: "Users",
+      url: "/admin/users",
+      icon: Users,
+    },
+    {
+      title: "Products",
+      url: "/admin/products",
+      icon: ShoppingBag,
+    },
+    {
+      title: "Orders",
+      url: "/admin/orders",
+      icon: Layers,
+    },
+    {
+      title: "Shops",
+      url: "/admin/shops",
+      icon: Store,
+    },
+    {
+      title: "Categories",
+      url: "/admin/categories",
+      icon: Layers,
+    },
+    {
+      title: "Brands",
+      url: "/admin/brands",
+      icon: Tag,
+    },
+    {
+      title: "Coupons",
+      url: "/admin/coupons",
+      icon: Tag,
+    },
+    {
+      title: "Flash Sales",
+      url: "/admin/flash-sales",
+      icon: Sparkles,
+    },
+    {
+      title: "Reviews",
+      url: "/admin/reviews",
+      icon: MessageSquare,
+    },
+  ];
+
+  const userMenu = [
+    {
+      title: "Overview",
+      url: "/user/dashboard",
+      icon: LayoutDashboard,
+    },
+    {
+      title: "My Orders",
+      url: "/user/dashboard/orders",
+      icon: ShoppingBag,
+    },
+    {
+      title: "Wishlist",
+      url: "/user/dashboard/wishlist",
+      icon: Heart,
+    },
+    {
+      title: "My Reviews",
+      url: "/user/dashboard/reviews",
+      icon: MessageSquare,
+    },
+    {
+      title: "Profile Settings",
+      url: "/user/dashboard/profile",
+      icon: UserCog,
+    },
+  ];
+
+  const menuItems = role === "admin" ? adminMenu : userMenu;
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -117,7 +135,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={menuItems} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser />

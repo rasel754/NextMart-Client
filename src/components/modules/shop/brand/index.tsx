@@ -16,7 +16,7 @@ const ManageBrands = ({ brands }: { brands: IBrand[] }) => {
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
 
   const handleDelete = (data: IBrand) => {
-    console.log(data);
+    // console.log(data);
     setSelectedId(data?._id);
     setSelectedItem(data?.name);
     setModalOpen(true);
@@ -26,7 +26,7 @@ const ManageBrands = ({ brands }: { brands: IBrand[] }) => {
     try {
       if (selectedId) {
         const res = await deleteBrand(selectedId);
-        console.log(res);
+        // console.log(res);
         if (res.success) {
           toast.success(res.message);
           setModalOpen(false);

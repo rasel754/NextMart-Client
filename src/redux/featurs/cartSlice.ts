@@ -23,15 +23,19 @@ const cartSlice = createSlice({
   initialState,
   reducers: {
     addProduct: (state, action) => {
+      // Support both direct product payload and wrapper payload with quantity
+      const product = action.payload.product || action.payload;
+      const qty = action.payload.quantity || 1;
+
       const productToAdd = state.products.find(
-        (product) => product._id === action.payload._id
+        (p) => p._id === product._id
       );
 
       if (productToAdd) {
-        productToAdd.orderedQuantity += 1;
+        productToAdd.orderedQuantity += qty;
         return;
       }
-      state.products.push({ ...action.payload, orderedQuantity: 1 });
+      state.products.push({ ...product, orderedQuantity: qty });
     },
     incrementOrderedQuantity: (state, action) => {
       const productToIncrement = state.products.find(

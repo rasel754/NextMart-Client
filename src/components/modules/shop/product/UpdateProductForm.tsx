@@ -148,7 +148,7 @@ export default function UpdateProductsForm({ product }: { product:IProduct}) {
     const formData = new FormData();
     formData.append("data", JSON.stringify(modifiedData));
 
-    console.log(formData);
+    // console.log(formData);
 
     for (const file of imageFiles) {
       formData.append("images", file);
@@ -161,7 +161,7 @@ export default function UpdateProductsForm({ product }: { product:IProduct}) {
         router.push("/user/shop/products");
       } else {
         toast.error(res.message);
-        console.log(res.message);
+        // console.log(res.message);
       }
     } catch (err: any) {
       console.error(err);

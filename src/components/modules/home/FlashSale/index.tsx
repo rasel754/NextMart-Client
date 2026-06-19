@@ -1,10 +1,9 @@
 import { Button } from "@/components/ui/button";
 import NMContainer from "@/components/ui/core/NMContainer";
-import ProductCard from "@/components/ui/core/ProductCard";
 import { getFlashSaleProducts } from "@/services/FlashSale";
-import { IProduct } from "@/types/product";
 import Link from "next/link";
 import CountDown from "./CountDown";
+import FlashSaleCarousel from "./FlashSaleCarousel";
 
 const FlashSale = async () => {
   const { data: products } = await getFlashSaleProducts();
@@ -23,12 +22,8 @@ const FlashSale = async () => {
           </Link>
         </div>
 
-        <div className="grid grid-cols-5 gap-8 my-5">
-          {Array(5)
-            .fill(products?.[0])
-            .map((product: IProduct, idx: number) => (
-              <ProductCard key={idx} product={product} />
-            ))}
+        <div className="my-8">
+          <FlashSaleCarousel products={products || []} />
         </div>
       </div>
     </div>

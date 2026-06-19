@@ -21,12 +21,16 @@ const FeaturedProducts = async () => {
           </Link>
         </div>
 
-        <div className="grid grid-cols-5 gap-8 my-5">
-          {Array(5)
-            .fill(products?.[0])
-            .map((product: IProduct, idx: number) => (
-              <ProductCard key={idx} product={product} />
-            ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 my-5">
+          {products && products.length > 0 ? (
+            products.slice(0, 8).map((product: IProduct, idx: number) => (
+              <ProductCard key={product._id || idx} product={product} />
+            ))
+          ) : (
+            <p className="text-center text-muted-foreground col-span-full py-8">
+              No products found.
+            </p>
+          )}
         </div>
       </div>
     </div>

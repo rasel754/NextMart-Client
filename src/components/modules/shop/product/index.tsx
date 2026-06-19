@@ -12,6 +12,7 @@ import { useState } from "react";
 import DiscountModal from "./DiscountModal";
 import TablePagination from "@/components/ui/core/NMTable/TablePagination";
 import { IMeta } from "@/types";
+import { toast } from "sonner";
 
 
 const ManageProducts = ({ products ,meta}: { products: IProduct[] , meta:IMeta}) => {
@@ -19,11 +20,11 @@ const ManageProducts = ({ products ,meta}: { products: IProduct[] , meta:IMeta})
   const [selectedIds , setSelectedIds] = useState<string[] | []>([]);
 
   const handleView = (product: IProduct) => {
-    console.log("Viewing product:", product);
+    toast.info(`Viewing product: ${product.name}`);
   };
 
   const handleDelete = (productId: string) => {
-    console.log("Deleting product with ID:", productId);
+    toast.info(`Deleting product with ID: ${productId}`);
   };
 
   const columns: ColumnDef<IProduct>[] = [

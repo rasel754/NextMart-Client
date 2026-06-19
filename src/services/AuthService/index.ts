@@ -81,3 +81,19 @@ export const reCaptchaTokenVerification = async (token: string) => {
 export const logout = async () => {
   (await cookies()).delete("accessToken");
 };
+
+export const changePassword = async (passwords: { oldPassword: string; newPassword: string }) => {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/auth/change-password`, {
+      method: "POST",
+      headers: {
+        Authorization: (await cookies()).get("accessToken")?.value || "",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(passwords),
+    });
+    return await res.json();
+  } catch (error: any) {
+    return Error(error);
+  }
+};

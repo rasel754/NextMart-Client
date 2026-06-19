@@ -16,12 +16,12 @@ export default function Coupon() {
     form.reset();
   };
 
-  const onSubmit: SubmitHandler<FieldValues> = async (data) => {
+  const onSubmit: SubmitHandler<FieldValues> = async () => {
     try {
-      console.log(data);
-    } catch (error: any) {
-      console.log(error);
-      toast.error(error.message);
+      // Apply coupon logic
+    } catch (error) {
+      const err = error as Error;
+      toast.error(err.message);
     }
   };
 

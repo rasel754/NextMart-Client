@@ -6,26 +6,30 @@ import { getAllCategories } from "@/services/Category";
 import { getAllProducts } from "@/services/product";
 import { ICategory } from "@/types";
 
-const AllProductsPage =async () => {
-     const { data: categories } = await getAllCategories();
-     const {data : products} = await getAllProducts();
-    return (
-      <NMContainer>
-        <ProductBanner
-          title="All Products"
-          path="Home - Products"
-        ></ProductBanner>
-         <h2 className="text-xl font-bold my-5">Featured Collection </h2>
-         <div className="grid grid-cols-6 gap-8 my-5">
-        {Array(6)
-          .fill(categories?.[0])
-          .map((category: ICategory, idx: number) => (
-            <CategoryCard key={idx} category={category} />
-          ))}
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
+const AllProductsPage = async ({ searchParams }: { searchParams: SearchParams }) => {
+  const resolvedParams = await searchParams;
+  const { data: categories } = await getAllCategories();
+  const res = await getAllProducts(resolvedParams);
+  
+  const products = res?.data || [];
+  const meta = res?.meta || null;
+
+  return (
+    <NMContainer>
+      <ProductBanner title="All Products" path="Home - Products" />
+      
+      <h2 className="text-xl font-bold my-5">Featured Categories</h2>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-6 my-5">
+        {categories?.slice(0, 6).map((category: ICategory, idx: number) => (
+          <CategoryCard key={category._id || idx} category={category} />
+        ))}
       </div>
-      <AllProducts products={products}/>
-      </NMContainer>
-    );
+      
+      <AllProducts products={products} meta={meta} />
+    </NMContainer>
+  );
 };
 
 export default AllProductsPage;

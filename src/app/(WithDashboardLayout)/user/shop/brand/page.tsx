@@ -3,7 +3,7 @@ import { getAllBrands } from '@/services/Brand';
 import React from 'react';
 
 const ProductBrandPage =async () => {
-    const {data ,meta} =await getAllBrands()
+    const {data} =await getAllBrands()
     return (
         <div>
             <ManageBrands brands={data}></ManageBrands>

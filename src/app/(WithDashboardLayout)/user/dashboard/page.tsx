@@ -1,12 +1,9 @@
-export default function UserDashboard() {
-  return (
-    <div>
-      <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-        <div className="aspect-video rounded-xl bg-muted " />
-        <div className="aspect-video rounded-xl bg-muted" />
-        <div className="aspect-video rounded-xl bg-muted" />
-      </div>
-      <div className="min-h-[100vh] rounded-xl bg-muted mt-4" />
-    </div>
-  );
+import { getMyOrders } from "@/services/order";
+import UserDashboardOverview from "./UserDashboardOverview";
+
+export default async function UserDashboard() {
+  const res = await getMyOrders({ limit: 100 });
+  const orders = res?.result || res?.data || [];
+
+  return <UserDashboardOverview orders={orders} />;
 }

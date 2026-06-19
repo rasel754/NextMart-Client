@@ -18,12 +18,20 @@ const Category = async () => {
           </Button>
         </Link>
       </div>
-      <div className="grid grid-cols-6 gap-8 my-5">
-        {Array(12)
-          .fill(categories?.[0])
-          .map((category: ICategory, idx: number) => (
-            <CategoryCard key={idx} category={category} />
-          ))}
+      <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-6 my-5">
+        {categories && categories.length > 0 ? (
+          categories.slice(0, 12).map((category: ICategory, idx: number) => (
+            <Link key={category._id || idx} href={`/products?category=${category._id}`}>
+              <div className="transform transition duration-300 hover:scale-105 cursor-pointer">
+                <CategoryCard category={category} />
+              </div>
+            </Link>
+          ))
+        ) : (
+          <p className="text-center text-muted-foreground col-span-full py-6">
+            No categories found.
+          </p>
+        )}
       </div>
     </div>
   </NMContainer>

@@ -9,7 +9,6 @@ export default function CartProductCard({ product }: { product: ICartProduct }) 
   const dispatch = useAppDispatch();
 
   const handleIncrementQuantity = (id:string) => {
-    console.log("id", id);
     dispatch(incrementOrderedQuantity(id));
   }
 

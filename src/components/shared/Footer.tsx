@@ -1,60 +1,119 @@
 import Logo from "@/assets/svgs/Logo";
-import { Facebook, Instagram, X } from "lucide-react";
+import { Facebook, Linkedin, Github, Mail, Phone, MapPin } from "lucide-react";
 import Link from "next/link";
 
 const Footer = () => {
-  const navLinks = [
+  const quickLinks = [
     { href: "/", label: "Home" },
-    { href: "/shop", label: "Shop" },
-    { href: "/products", label: "App Products" },
+    { href: "/products", label: "All Products" },
     { href: "/about", label: "About Us" },
-    { href: "/testimonial", label: "Testimonial" },
-    { href: "/blogs", label: "Blogs" },
+    { href: "/faq", label: "FAQs" },
+    { href: "/privacy", label: "Privacy Policy" },
+  ];
+
+  const customerService = [
     { href: "/contact", label: "Contact Us" },
+    { href: "/cart", label: "Shopping Cart" },
+    { href: "/faq", label: "Returns & Exchanges" },
+    { href: "/privacy", label: "Terms of Service" },
   ];
 
   const socialLinks = [
-    { href: "#", icon: Facebook },
-    { href: "#", icon: Instagram },
-    { href: "#", icon: X },
+    { href: "https://facebook.com", icon: Facebook, label: "Facebook" },
+    { href: "https://linkedin.com", icon: Linkedin, label: "LinkedIn" },
+    { href: "https://github.com", icon: Github, label: "GitHub" },
   ];
+
   return (
-    <footer className="bg-white border-t border-gray-200 py-24">
-      <div className="max-w-6xl mx-auto px-4 text-center">
-        <div className="flex flex-col items-center mb-6">
-          <div className="flex items-center space-x-2">
-            <h1 className="text-2xl font-black flex items-center">
-              <Logo />
-              Next Mart
-            </h1>
+    <footer className="bg-card text-card-foreground border-t border-border/80 pt-16 pb-8">
+      <div className="container mx-auto px-4 max-w-6xl">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+          {/* Column 1: Brand & Tagline */}
+          <div className="space-y-4">
+            <Link href="/" className="flex items-center space-x-2">
+              <h1 className="text-2xl font-black flex items-center gap-2">
+                <Logo />
+                Next Mart
+              </h1>
+            </Link>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Your premium destination for the finest gadgets, home essentials, apparel, and active items. Shop safely and experience next-level digital commerce.
+            </p>
           </div>
-          <p className="text-gray-600 mt-3 w-1/2">
-            Save big this Black Friday with unbeatable deals on tech, home
-            essentials, fashion, and more! Limited stock.
-          </p>
+
+          {/* Column 2: Quick Links */}
+          <div>
+            <h3 className="font-bold text-base mb-4 text-foreground uppercase tracking-wider">
+              Quick Links
+            </h3>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              {quickLinks.map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href} className="hover:text-primary transition-colors">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 3: Customer Service */}
+          <div>
+            <h3 className="font-bold text-base mb-4 text-foreground uppercase tracking-wider">
+              Customer Support
+            </h3>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              {customerService.map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href} className="hover:text-primary transition-colors">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 4: Contact & Socials */}
+          <div className="space-y-4">
+            <h3 className="font-bold text-base mb-4 text-foreground uppercase tracking-wider">
+              Contact Us
+            </h3>
+            <ul className="space-y-3 text-sm text-muted-foreground">
+              <li className="flex gap-2 items-center">
+                <MapPin className="w-4 h-4 text-primary shrink-0" />
+                <span>Gulshan-2, Dhaka, Bangladesh</span>
+              </li>
+              <li className="flex gap-2 items-center">
+                <Phone className="w-4 h-4 text-primary shrink-0" />
+                <span>+880 1234 567890</span>
+              </li>
+              <li className="flex gap-2 items-center">
+                <Mail className="w-4 h-4 text-primary shrink-0" />
+                <span>support@nextmart.com</span>
+              </li>
+            </ul>
+
+            <div className="flex space-x-3 pt-2">
+              {socialLinks.map(({ href, icon: Icon, label }, index) => (
+                <Link
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  key={index}
+                  className="p-2 rounded-full border border-border/80 text-muted-foreground hover:text-primary hover:border-primary transition"
+                  aria-label={label}
+                >
+                  <Icon className="w-4 h-4" />
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
 
-        <hr />
-        <ul className="flex justify-center space-x-6 text-sm text-gray-800 font-medium my-4">
-          {navLinks.map((link) => (
-            <li key={link.href}>
-              <Link href={link.href} className="hover:text-purple-600">
-                {link.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <hr className="border-border/60 my-6" />
 
-        <div className="flex justify-center space-x-4">
-          {socialLinks.map(({ href, icon: Icon }, index) => (
-            <Link
-              href={href}
-              key={index}
-              className="text-gray-600 hover:text-purple-600"
-            >
-              <Icon className="w-5 h-5" />
-            </Link>
-          ))}
+        <div className="text-center text-xs text-muted-foreground">
+          <p>© {new Date().getFullYear()} NextMart Ltd. All rights reserved.</p>
         </div>
       </div>
     </footer>

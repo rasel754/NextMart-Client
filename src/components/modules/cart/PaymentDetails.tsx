@@ -49,8 +49,6 @@ export default function PaymentDetails() {
       }
 
       const res = await createOrder(order);
-      console.log(order);
-      console.log(res);
 
       if (res.success) {
         toast.success(res.message, { id: orderLoading });
