@@ -36,7 +36,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const adminMenu = [
     {
       title: "Overview",
-      url: "/admin/dashboard",
+      url: "/admin",
       icon: LayoutDashboard,
     },
     {

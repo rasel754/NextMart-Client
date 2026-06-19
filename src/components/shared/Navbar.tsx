@@ -108,7 +108,7 @@ export default function Navbar() {
           )}
 
           {/* Favorites (Wishlist Link) */}
-          <Link href={user ? `/${user.role}/dashboard` : "/login"}>
+          <Link href={user ? (user.role === "admin" ? "/admin" : "/user/dashboard/wishlist") : "/login"}>
             <Button variant="ghost" size="icon" className="rounded-full relative">
               <Heart className="h-5 w-5" />
             </Button>
@@ -154,13 +154,13 @@ export default function Navbar() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="cursor-pointer" asChild>
-                  <Link href={`/${user.role}/dashboard`}>Dashboard</Link>
+                  <Link href={user.role === "admin" ? "/admin" : "/user/dashboard"}>Dashboard</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem className="cursor-pointer" asChild>
                   <Link href="/cart">My Orders</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem className="cursor-pointer" asChild>
-                  <Link href={`/${user.role}/dashboard`}>Settings</Link>
+                  <Link href={user.role === "admin" ? "/admin/profile" : "/user/dashboard/profile"}>Settings</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem

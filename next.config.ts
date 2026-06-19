@@ -14,6 +14,26 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: '5mb',
     }
+  },
+
+  async redirects() {
+    return [
+      {
+        source: "/admin/dashboard",
+        destination: "/admin",
+        permanent: true,
+      },
+      {
+        source: "/admin/dashboard/:path*",
+        destination: "/admin/:path*",
+        permanent: true,
+      },
+      {
+        source: "/user",
+        destination: "/user/dashboard",
+        permanent: true,
+      },
+    ];
   }
 };
 

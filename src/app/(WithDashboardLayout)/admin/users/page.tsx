@@ -1,9 +1,18 @@
 import { getAllUsers } from "@/services/user";
 import AdminUsersContainer from "./AdminUsersContainer";
 
-export default async function AdminUsersPage() {
-  const res = await getAllUsers();
-  const users = res?.data || res?.result || [];
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
-  return <AdminUsersContainer initialUsers={users} />;
+export default async function AdminUsersPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  const resolvedParams = await searchParams;
+  const res = await getAllUsers(resolvedParams);
+  
+  const users = res?.data || res?.result || [];
+  const meta = res?.meta || null;
+
+  return <AdminUsersContainer initialUsers={users} meta={meta} />;
 }

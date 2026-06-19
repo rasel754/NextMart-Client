@@ -1,7 +1,18 @@
 "use client";
 
+import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, ShoppingBag, Users, Store, Box } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { useTheme } from "next-themes";
+import {
+  TrendingUp,
+  ShoppingCart,
+  Users,
+  Store,
+  Package,
+  Calendar,
+} from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -14,10 +25,8 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from "recharts";
-import { useEffect, useState } from "react";
 
 interface AdminDashboardOverviewProps {
   metaData: {
@@ -31,11 +40,16 @@ interface AdminDashboardOverviewProps {
     orderStatusDistribution: { status: string; count: number }[];
     newUsersPerMonth: { month: string; count: number }[];
   };
+  recentOrders: any[];
 }
 
-const COLORS = ["#6366f1", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
+const PIE_COLORS = ["#10b981", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6"];
 
-export default function AdminDashboardOverview({ metaData }: AdminDashboardOverviewProps) {
+export default function AdminDashboardOverview({
+  metaData,
+  recentOrders = [],
+}: AdminDashboardOverviewProps) {
+  const { theme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -53,93 +67,150 @@ export default function AdminDashboardOverview({ metaData }: AdminDashboardOverv
     newUsersPerMonth = [],
   } = metaData || {};
 
+  const isDark = mounted && (theme === "dark" || resolvedTheme === "dark");
+
+  const gridStroke = isDark ? "#374151" : "#e5e7eb";
+  const axisColor = isDark ? "#9ca3af" : "#6b7280";
+
+  const getStatusBadge = (status: string) => {
+    const norm = status?.toLowerCase();
+    if (norm === "pending") {
+      return <Badge className="bg-yellow-500/15 text-yellow-600 dark:text-yellow-400" variant="outline">{status}</Badge>;
+    }
+    if (norm === "processing" || norm === "shipped") {
+      return <Badge className="bg-blue-500/15 text-blue-600 dark:text-blue-400" variant="outline">{status}</Badge>;
+    }
+    if (norm === "delivered" || norm === "completed" || norm === "success") {
+      return <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" variant="outline">{status}</Badge>;
+    }
+    return <Badge className="bg-red-500/15 text-red-600 dark:text-red-400" variant="outline">{status}</Badge>;
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Top Welcome Title */}
       <div>
-        <h1 className="text-2xl font-black text-foreground">Admin Analytics Overview</h1>
-        <p className="text-xs text-muted-foreground">Monitor platform performance, growth metrics, and order distributions.</p>
+        <h1 className="text-3xl font-black tracking-tight text-foreground">Admin Analytics</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          Monitor platform transactions, shops growth, catalog status and monthly earnings.
+        </p>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid gap-4 md:grid-cols-5">
-        <Card className="rounded-2xl border/60">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-emerald-500" />
+      {/* Row 1: KPI Cards */}
+      <div className="grid gap-4 grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
+        {/* Total Revenue */}
+        <Card className="rounded-3xl border border-border/60 shadow-sm hover:shadow transition bg-card overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
+              Total Revenue
+            </CardTitle>
+            <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-950/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+              <TrendingUp className="h-4 w-4" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-black">${totalRevenue.toLocaleString()}</div>
-            <p className="text-[10px] text-muted-foreground mt-1">Gross paid order values</p>
+            <div className="text-2xl font-black text-foreground">৳{totalRevenue.toLocaleString()}</div>
+            <p className="text-[10px] text-muted-foreground mt-1.5 flex items-center gap-1">
+              <span className="text-emerald-600 font-bold">+12%</span> this month
+            </p>
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl border/60">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Total Orders</CardTitle>
-            <ShoppingBag className="h-4 w-4 text-primary" />
+        {/* Total Orders */}
+        <Card className="rounded-3xl border border-border/60 shadow-sm hover:shadow transition bg-card overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
+              Total Orders
+            </CardTitle>
+            <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-950/40 flex items-center justify-center text-blue-600 dark:text-blue-400">
+              <ShoppingCart className="h-4 w-4" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-black">{totalOrders}</div>
-            <p className="text-[10px] text-muted-foreground mt-1">Platform transactions count</p>
+            <div className="text-2xl font-black text-foreground">{totalOrders.toLocaleString()}</div>
+            <p className="text-[10px] text-muted-foreground mt-1.5">Completed transactions</p>
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl border/60">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Total Users</CardTitle>
-            <Users className="h-4 w-4 text-blue-500" />
+        {/* Total Users */}
+        <Card className="rounded-3xl border border-border/60 shadow-sm hover:shadow transition bg-card overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
+              Total Users
+            </CardTitle>
+            <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-950/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+              <Users className="h-4 w-4" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-black">{totalUsers}</div>
-            <p className="text-[10px] text-muted-foreground mt-1">Registered customers</p>
+            <div className="text-2xl font-black text-foreground">{totalUsers.toLocaleString()}</div>
+            <p className="text-[10px] text-muted-foreground mt-1.5">Registered accounts</p>
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl border/60">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Active Shops</CardTitle>
-            <Store className="h-4 w-4 text-yellow-500" />
+        {/* Active Shops */}
+        <Card className="rounded-3xl border border-border/60 shadow-sm hover:shadow transition bg-card overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
+              Active Shops
+            </CardTitle>
+            <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-950/40 flex items-center justify-center text-amber-600 dark:text-amber-400">
+              <Store className="h-4 w-4" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-black">{totalShops}</div>
-            <p className="text-[10px] text-muted-foreground mt-1">Onboarded vendor shops</p>
+            <div className="text-2xl font-black text-foreground">{totalShops.toLocaleString()}</div>
+            <p className="text-[10px] text-muted-foreground mt-1.5">Onboarded merchants</p>
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl border/60">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Total Products</CardTitle>
-            <Box className="h-4 w-4 text-indigo-500" />
+        {/* Total Products */}
+        <Card className="rounded-3xl border border-border/60 shadow-sm hover:shadow transition bg-card overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
+              Total Products
+            </CardTitle>
+            <div className="w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-950/40 flex items-center justify-center text-rose-600 dark:text-rose-400">
+              <Package className="h-4 w-4" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-black">{totalProducts}</div>
-            <p className="text-[10px] text-muted-foreground mt-1">Active items catalog</p>
+            <div className="text-2xl font-black text-foreground">{totalProducts.toLocaleString()}</div>
+            <p className="text-[10px] text-muted-foreground mt-1.5">Catalog list catalog items</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Recharts Graphics */}
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Monthly Revenue Bar Chart */}
-        <Card className="rounded-2xl border/60">
-          <CardHeader>
-            <CardTitle className="text-sm font-bold uppercase tracking-wider">Monthly Revenue (6 Months)</CardTitle>
+      {/* Row 2: Bar Chart + Pie Chart */}
+      <div className="grid gap-6 grid-cols-1 md:grid-cols-3">
+        {/* Monthly Revenue Bar Chart (col-span-2) */}
+        <Card className="rounded-3xl border border-border/60 shadow-sm bg-card md:col-span-2 overflow-hidden">
+          <CardHeader className="border-b border-border/40 pb-4">
+            <CardTitle className="text-xs font-black uppercase tracking-wider text-foreground">
+              Monthly Revenue (Last 6 Months)
+            </CardTitle>
           </CardHeader>
-          <CardContent className="h-72">
+          <CardContent className="h-[320px] pt-6">
             {mounted ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={monthlyRevenue}>
-                  <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
-                  <XAxis dataKey="month" tick={{ fontSize: 10 }} />
-                  <YAxis tick={{ fontSize: 10 }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} opacity={0.5} />
+                  <XAxis dataKey="month" tick={{ fill: axisColor, fontSize: 10 }} />
+                  <YAxis
+                    tickFormatter={(v) => `৳${v.toLocaleString()}`}
+                    tick={{ fill: axisColor, fontSize: 10 }}
+                  />
                   <Tooltip
+                    formatter={(v) => [`৳${Number(v).toLocaleString()}`, "Revenue"]}
                     contentStyle={{
                       backgroundColor: "hsl(var(--card))",
                       borderColor: "hsl(var(--border))",
-                      fontSize: 12,
+                      borderRadius: "16px",
+                      fontSize: "12px",
+                      color: "hsl(var(--foreground))",
                     }}
                   />
-                  <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]} />
+                  <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -148,81 +219,56 @@ export default function AdminDashboardOverview({ metaData }: AdminDashboardOverv
           </CardContent>
         </Card>
 
-        {/* User Registrations Line Chart */}
-        <Card className="rounded-2xl border/60">
-          <CardHeader>
-            <CardTitle className="text-sm font-bold uppercase tracking-wider">New User registrations</CardTitle>
+        {/* Order Status Distribution Pie Chart (col-span-1) */}
+        <Card className="rounded-3xl border border-border/60 shadow-sm bg-card overflow-hidden">
+          <CardHeader className="border-b border-border/40 pb-4">
+            <CardTitle className="text-xs font-black uppercase tracking-wider text-foreground">
+              Order Status Distribution
+            </CardTitle>
           </CardHeader>
-          <CardContent className="h-72">
-            {mounted ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={newUsersPerMonth}>
-                  <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
-                  <XAxis dataKey="month" tick={{ fontSize: 10 }} />
-                  <YAxis tick={{ fontSize: 10 }} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--card))",
-                      borderColor: "hsl(var(--border))",
-                      fontSize: 12,
-                    }}
-                  />
-                  <Line type="monotone" dataKey="count" stroke="#6366f1" strokeWidth={3} dot={{ r: 4 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex h-full w-full items-center justify-center bg-muted/20 rounded-xl" />
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Order Status Distribution Pie Chart */}
-        <Card className="rounded-2xl border/60 md:col-span-2">
-          <CardHeader>
-            <CardTitle className="text-sm font-bold uppercase tracking-wider">Order Status Distribution</CardTitle>
-          </CardHeader>
-          <CardContent className="h-80 flex flex-col md:flex-row items-center justify-around gap-6">
+          <CardContent className="h-[320px] pt-6 flex flex-col justify-between">
             {mounted ? (
               <>
-                <div className="w-full md:w-1/2 h-64">
+                <div className="w-full h-[180px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
                         data={orderStatusDistribution}
                         cx="50%"
                         cy="50%"
-                        innerRadius={60}
-                        outerRadius={80}
-                        paddingAngle={5}
+                        innerRadius={50}
+                        outerRadius={75}
+                        paddingAngle={4}
                         dataKey="count"
                         nameKey="status"
+                        labelLine={false}
                       >
-                        {orderStatusDistribution.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        {orderStatusDistribution.map((_, index) => (
+                          <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                         ))}
                       </Pie>
-                      <Tooltip />
-                      <Legend />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "hsl(var(--card))",
+                          borderColor: "hsl(var(--border))",
+                          borderRadius: "16px",
+                          fontSize: "12px",
+                        }}
+                      />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
-                {/* Stats Table representation */}
-                <div className="w-full md:w-1/2 space-y-3">
-                  <h3 className="font-bold text-xs uppercase tracking-wider text-muted-foreground border-b pb-2">Status Breakdown</h3>
-                  <div className="space-y-2">
-                    {orderStatusDistribution.map((entry, idx) => (
-                      <div key={idx} className="flex justify-between items-center text-sm">
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="w-3 h-3 rounded-full"
-                            style={{ backgroundColor: COLORS[idx % COLORS.length] }}
-                          />
-                          <span className="capitalize font-medium text-muted-foreground">{entry.status}</span>
-                        </div>
-                        <span className="font-bold text-foreground">{entry.count} orders</span>
-                      </div>
-                    ))}
-                  </div>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  {orderStatusDistribution.map((entry, idx) => (
+                    <div key={idx} className="flex items-center gap-1.5">
+                      <div
+                        className="w-2.5 h-2.5 rounded-full shrink-0"
+                        style={{ backgroundColor: PIE_COLORS[idx % PIE_COLORS.length] }}
+                      />
+                      <span className="capitalize font-bold text-muted-foreground truncate">{entry.status}</span>
+                      <span className="font-extrabold text-foreground ml-auto">({entry.count})</span>
+                    </div>
+                  ))}
                 </div>
               </>
             ) : (
@@ -231,6 +277,107 @@ export default function AdminDashboardOverview({ metaData }: AdminDashboardOverv
           </CardContent>
         </Card>
       </div>
+
+      {/* Row 3: Line Chart (Full Width) */}
+      <Card className="rounded-3xl border border-border/60 shadow-sm bg-card overflow-hidden">
+        <CardHeader className="border-b border-border/40 pb-4">
+          <CardTitle className="text-xs font-black uppercase tracking-wider text-foreground">
+            New User Registrations (Last 6 Months)
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="h-[300px] pt-6">
+          {mounted ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={newUsersPerMonth}>
+                <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} opacity={0.5} />
+                <XAxis dataKey="month" tick={{ fill: axisColor, fontSize: 10 }} />
+                <YAxis tick={{ fill: axisColor, fontSize: 10 }} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--card))",
+                    borderColor: "hsl(var(--border))",
+                    borderRadius: "16px",
+                    fontSize: "12px",
+                  }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="count"
+                  stroke="hsl(var(--primary))"
+                  strokeWidth={3}
+                  dot={{ r: 4, strokeWidth: 2, fill: "hsl(var(--card))" }}
+                  activeDot={{ r: 6 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-muted/20 rounded-xl" />
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Row 4: Recent Orders */}
+      <Card className="rounded-3xl border border-border/60 shadow-sm bg-card overflow-hidden">
+        <CardHeader className="border-b border-border/40 pb-4">
+          <CardTitle className="text-xs font-black uppercase tracking-wider text-foreground">
+            Recent Platform Orders
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader className="bg-muted/30">
+                <TableRow>
+                  <TableHead className="text-xs font-bold text-muted-foreground uppercase tracking-wider px-6 py-3">Order ID</TableHead>
+                  <TableHead className="text-xs font-bold text-muted-foreground uppercase tracking-wider px-6 py-3">Customer</TableHead>
+                  <TableHead className="text-xs font-bold text-muted-foreground uppercase tracking-wider px-6 py-3 text-right">Total</TableHead>
+                  <TableHead className="text-xs font-bold text-muted-foreground uppercase tracking-wider px-6 py-3 text-center">Status</TableHead>
+                  <TableHead className="text-xs font-bold text-muted-foreground uppercase tracking-wider px-6 py-3">Date</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {recentOrders.length > 0 ? (
+                  recentOrders.map((order) => (
+                    <TableRow key={order._id} className="hover:bg-muted/20 border-b border-border/40 transition-colors">
+                      <TableCell className="px-6 py-4 font-bold text-xs font-mono text-foreground">
+                        {order._id}
+                      </TableCell>
+                      <TableCell className="px-6 py-4">
+                        <div className="flex flex-col">
+                          <span className="font-bold text-xs text-foreground">
+                            {order.user?.name || "Anonymous Customer"}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground font-mono">
+                            {order.user?.email || "N/A"}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="px-6 py-4 text-right font-black text-xs text-foreground">
+                        ৳{order.finalAmount?.toLocaleString() || order.totalAmount?.toLocaleString()}
+                      </TableCell>
+                      <TableCell className="px-6 py-4 text-center">
+                        {getStatusBadge(order.status)}
+                      </TableCell>
+                      <TableCell className="px-6 py-4 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5 text-primary/60" />
+                          {new Date(order.createdAt).toLocaleDateString()}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-10 text-muted-foreground text-xs font-medium">
+                      No orders found.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

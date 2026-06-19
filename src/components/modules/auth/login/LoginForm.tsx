@@ -105,7 +105,7 @@ export default function LoginForm() {
           variant="outline"
           size="sm"
           className="rounded-full text-xs font-semibold"
-          onClick={() => handleDemoLogin("admin@nextmart.com", "Admin@1234")}
+          onClick={() => handleDemoLogin("admin.example@gmail.com", "adminPassword@1")}
         >
           Demo Admin Login
         </Button>
@@ -114,7 +114,7 @@ export default function LoginForm() {
           variant="outline"
           size="sm"
           className="rounded-full text-xs font-semibold"
-          onClick={() => handleDemoLogin("user@nextmart.com", "User@1234")}
+          onClick={() => handleDemoLogin("user.example@gmail.com", "userPassword@1")}
         >
           Demo User Login
         </Button>

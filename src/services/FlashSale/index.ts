@@ -35,3 +35,22 @@ export const getFlashSaleProducts = async () => {
     return Error(error.message);
   }
 };
+
+// delete Flash Sale
+export const deleteFlashSale = async (flashSaleId: string): Promise<any> => {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_API}/flash-sale/${flashSaleId}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: (await cookies()).get("accessToken")!.value,
+        },
+      }
+    );
+    revalidateTag("PRODUCT");
+    return res.json();
+  } catch (error: any) {
+    return Error(error);
+  }
+};

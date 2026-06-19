@@ -59,3 +59,27 @@ export const deleteReview = async (reviewId: string) => {
     return Error(error.message);
   }
 };
+
+export const getAllReviews = async (query?: Record<string, any>) => {
+  try {
+    const params = new URLSearchParams();
+    if (query) {
+      Object.entries(query).forEach(([key, val]) => {
+        if (val !== undefined && val !== null && val !== "") {
+          params.append(key, val.toString());
+        }
+      });
+    }
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/review?${params.toString()}`, {
+      headers: {
+        Authorization: (await cookies()).get("accessToken")?.value || "",
+      },
+      next: {
+        tags: ["REVIEW"],
+      },
+    });
+    return await res.json();
+  } catch (error: any) {
+    return Error(error.message);
+  }
+};
