@@ -16,10 +16,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Trash2, Plus, Image as ImageIcon } from "lucide-react";
+import { Trash2, Plus, Edit, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { addFlashSale, deleteFlashSale } from "@/services/FlashSale";
+import { addFlashSale, deleteFlashSale, updateFlashSale } from "@/services/FlashSale";
 import { DataTable } from "@/components/ui/core/DataTable";
 import { ConfirmModal } from "@/components/ui/core/ConfirmModal";
 import { Badge } from "@/components/ui/badge";
@@ -54,6 +54,7 @@ export default function AdminFlashSalesContainer({
   const router = useRouter();
   const [flashSales, setFlashSales] = useState<any[]>(initialFlashSales);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editFlashSaleId, setEditFlashSaleId] = useState<string | null>(null);
 
   // Modal State
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -70,22 +71,61 @@ export default function AdminFlashSalesContainer({
     },
   });
 
+  const formatDatetimeLocal = (dateStr: string) => {
+    if (!dateStr) return "";
+    const date = new Date(dateStr);
+    const pad = (num: number) => String(num).padStart(2, "0");
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  };
+
+  const handleStartEdit = (fs: any) => {
+    setEditFlashSaleId(fs._id);
+    form.reset({
+      product: fs.product?._id || fs.product || "",
+      discountPercentage: fs.discountPercentage || 0,
+      startTime: formatDatetimeLocal(fs.startTime),
+      endTime: formatDatetimeLocal(fs.endTime),
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditFlashSaleId(null);
+    form.reset({
+      product: "",
+      discountPercentage: 0,
+      startTime: "",
+      endTime: "",
+    });
+  };
+
   const onSubmit: SubmitHandler<FlashSaleFormValues> = async (data) => {
     setIsSubmitting(true);
     try {
-      const res = await addFlashSale(data);
+      let res;
+      if (editFlashSaleId) {
+        res = await updateFlashSale(editFlashSaleId, data);
+      } else {
+        res = await addFlashSale(data);
+      }
+
       if (res?.success) {
-        toast.success(res?.message || "Flash sale scheduled successfully!");
-        form.reset();
+        toast.success(res?.message || (editFlashSaleId ? "Flash sale updated successfully!" : "Flash sale scheduled successfully!"));
+        handleCancelEdit();
         router.refresh();
         if (res.data) {
-          setFlashSales((prev) => [res.data, ...prev]);
+          if (editFlashSaleId) {
+            setFlashSales((prev) =>
+              prev.map((item) => (item._id === editFlashSaleId ? res.data : item))
+            );
+          } else {
+            setFlashSales((prev) => [res.data, ...prev]);
+          }
         }
       } else {
-        toast.error(res?.message || "Failed to create flash sale.");
+        toast.error(res?.message || "Failed to save flash sale.");
       }
     } catch {
-      toast.error("An error occurred during flash sale creation.");
+      toast.error("An error occurred during flash sale save.");
     } finally {
       setIsSubmitting(false);
     }
@@ -206,15 +246,25 @@ export default function AdminFlashSalesContainer({
         const fs = row.original;
         const isDeleting = loadingDeleteId === fs._id;
         return (
-          <Button
-            variant="outline"
-            size="icon"
-            disabled={isDeleting}
-            className="h-8 w-8 rounded-full border-red-500/10 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
-            onClick={() => triggerDeleteConfirm(fs)}
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-          </Button>
+          <div className="flex items-center gap-1.5">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-8 w-8 rounded-full border-primary/10 text-primary hover:bg-primary/5"
+              onClick={() => handleStartEdit(fs)}
+            >
+              <Edit className="w-3.5 h-3.5" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              disabled={isDeleting}
+              className="h-8 w-8 rounded-full border-red-500/10 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
+              onClick={() => triggerDeleteConfirm(fs)}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </Button>
+          </div>
         );
       },
     },
@@ -233,8 +283,17 @@ export default function AdminFlashSalesContainer({
         {/* Left Column: Form */}
         <div className="bg-card border border-border/60 p-6 rounded-3xl shadow-sm space-y-4">
           <h3 className="font-black text-sm text-foreground border-b pb-2 flex gap-1.5 items-center">
-            <Plus className="w-4 h-4 text-primary" />
-            Schedule Flash Sale
+            {editFlashSaleId ? (
+              <>
+                <Edit className="w-4 h-4 text-primary" />
+                Update Flash Sale
+              </>
+            ) : (
+              <>
+                <Plus className="w-4 h-4 text-primary" />
+                Schedule Flash Sale
+              </>
+            )}
           </h3>
 
           <Form {...form}>
@@ -310,13 +369,31 @@ export default function AdminFlashSalesContainer({
                 )}
               />
 
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full rounded-full font-bold h-9 text-xs mt-2"
-              >
-                {isSubmitting ? "Creating..." : "Schedule Sale"}
-              </Button>
+              <div className="flex gap-2 mt-2">
+                {editFlashSaleId && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleCancelEdit}
+                    className="flex-1 rounded-full font-bold h-9 text-xs"
+                  >
+                    Cancel
+                  </Button>
+                )}
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className={`${editFlashSaleId ? "flex-1" : "w-full"} rounded-full font-bold h-9 text-xs`}
+                >
+                  {isSubmitting
+                    ? editFlashSaleId
+                      ? "Updating..."
+                      : "Scheduling..."
+                    : editFlashSaleId
+                    ? "Update Sale"
+                    : "Schedule Sale"}
+                </Button>
+              </div>
             </form>
           </Form>
         </div>

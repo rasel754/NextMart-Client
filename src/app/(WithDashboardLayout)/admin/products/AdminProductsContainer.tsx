@@ -5,7 +5,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2, Eye, ShoppingBag } from "lucide-react";
+import { Trash2, Eye, ShoppingBag, Plus, Edit } from "lucide-react";
 import { toast } from "sonner";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { deleteProduct } from "@/services/product";
@@ -13,12 +13,14 @@ import { DataTable } from "@/components/ui/core/DataTable";
 import { ConfirmModal } from "@/components/ui/core/ConfirmModal";
 import { IMeta } from "@/types/meta";
 import Image from "next/image";
+import ProductFormDialog from "./ProductFormDialog";
 
 interface AdminProductsContainerProps {
   initialProducts: any[];
   meta: IMeta | null;
   categories: any[];
   brands: any[];
+  shops: any[];
 }
 
 export default function AdminProductsContainer({
@@ -26,17 +28,17 @@ export default function AdminProductsContainer({
   meta,
   categories = [],
   brands = [],
+  shops = [],
 }: AdminProductsContainerProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-
   const [products, setProducts] = useState<any[]>(initialProducts);
   const [loadingProductId, setLoadingProductId] = useState<string | null>(null);
-
-  // Confirm delete modal state
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [targetProduct, setTargetProduct] = useState<any>(null);
+  const [targetProduct, setTargetProduct] = useState<any | null>(null);
+  const [formOpen, setFormOpen] = useState(false);
+  const [editProduct, setEditProduct] = useState<any | null>(null);
 
   useEffect(() => {
     setProducts(initialProducts);
@@ -188,6 +190,19 @@ export default function AdminProductsContainer({
               <Eye className="w-3.5 h-3.5" />
             </Button>
 
+            {/* Edit Product */}
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-8 w-8 rounded-full border-primary/10 text-primary hover:bg-primary/5"
+              onClick={() => {
+                setEditProduct(p);
+                setFormOpen(true);
+              }}
+            >
+              <Edit className="w-3.5 h-3.5" />
+            </Button>
+
             {/* Delete Product */}
             <Button
               variant="outline"
@@ -245,11 +260,22 @@ export default function AdminProductsContainer({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-black text-foreground">Manage Products</h1>
-        <p className="text-xs text-muted-foreground mt-0.5">
-          View platform inventory items list, verify catalog details, or remove products.
-        </p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-black text-foreground">Manage Products</h1>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            View platform inventory items list, verify catalog details, or remove products.
+          </p>
+        </div>
+        <Button
+          onClick={() => {
+            setEditProduct(null);
+            setFormOpen(true);
+          }}
+          className="rounded-full font-bold text-xs h-9 flex gap-1.5 items-center"
+        >
+          <Plus className="w-4 h-4" /> Add Product
+        </Button>
       </div>
 
       <DataTable
@@ -290,6 +316,21 @@ export default function AdminProductsContainer({
         confirmLabel="Delete Product"
         variant="danger"
         isLoading={loadingProductId === targetProduct?._id}
+      />
+
+      <ProductFormDialog
+        isOpen={formOpen}
+        onClose={() => {
+          setFormOpen(false);
+          setEditProduct(null);
+        }}
+        categories={categories}
+        brands={brands}
+        shops={shops}
+        productToEdit={editProduct}
+        onSuccess={() => {
+          router.refresh();
+        }}
       />
     </div>
   );

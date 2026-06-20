@@ -52,3 +52,25 @@ export const deleteCategory = async (categoryId: string): Promise<any> => {
     return Error(error);
   }
 };
+
+export const updateCategory = async (
+  categoryId: string,
+  data: FormData
+): Promise<any> => {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_API}/category/${categoryId}`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: (await cookies()).get("accessToken")!.value,
+        },
+        body: data,
+      }
+    );
+    revalidateTag("CATEGORY");
+    return res.json();
+  } catch (error: any) {
+    return Error(error);
+  }
+};

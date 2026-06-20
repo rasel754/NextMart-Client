@@ -4,10 +4,10 @@ import React, { useState, useEffect } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Store, Eye, ShieldAlert, CheckCircle } from "lucide-react";
+import { Store, Eye, ShieldAlert, CheckCircle, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { toggleShopStatus } from "@/services/Shop";
+import { toggleShopStatus, deleteShop } from "@/services/Shop";
 import { DataTable } from "@/components/ui/core/DataTable";
 import { ConfirmModal } from "@/components/ui/core/ConfirmModal";
 import { IMeta } from "@/types/meta";
@@ -34,9 +34,37 @@ export default function AdminShopsContainer({
   const [targetShop, setTargetShop] = useState<any>(null);
   const [targetStatus, setTargetStatus] = useState<string>("");
 
+  // Deletion state
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [loadingDeleteId, setLoadingDeleteId] = useState<string | null>(null);
+
   useEffect(() => {
     setShops(initialShops);
   }, [initialShops]);
+
+  const handleDeleteShop = async (shopId: string) => {
+    setLoadingDeleteId(shopId);
+    try {
+      const res = await deleteShop(shopId);
+      if (res?.success) {
+        toast.success(res?.message || "Shop deleted successfully.");
+        setShops((prev) => prev.filter((s) => s._id !== shopId));
+        router.refresh();
+      } else {
+        toast.error(res?.message || "Failed to delete shop.");
+      }
+    } catch {
+      toast.error("An error occurred while deleting shop.");
+    } finally {
+      setLoadingDeleteId(null);
+      setDeleteOpen(false);
+    }
+  };
+
+  const triggerDeleteConfirm = (shopObj: any) => {
+    setTargetShop(shopObj);
+    setDeleteOpen(true);
+  };
 
   const handleToggleStatus = async (shopId: string, newStatus: string) => {
     setLoadingShopId(shopId);
@@ -196,6 +224,17 @@ export default function AdminShopsContainer({
                 Activate
               </Button>
             )}
+
+            {/* Delete Shop */}
+            <Button
+              variant="outline"
+              size="icon"
+              disabled={isSelfLoading || loadingDeleteId === s._id}
+              className="h-8 w-8 rounded-full border-red-500/10 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
+              onClick={() => triggerDeleteConfirm(s)}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </Button>
           </div>
         );
       },
@@ -252,6 +291,21 @@ export default function AdminShopsContainer({
         confirmLabel={targetStatus === "suspended" ? "Suspend" : "Activate"}
         variant={targetStatus === "suspended" ? "danger" : "warning"}
         isLoading={loadingShopId === targetShop?.id}
+      />
+
+      <ConfirmModal
+        isOpen={deleteOpen}
+        onClose={() => setDeleteOpen(false)}
+        onConfirm={() => {
+          if (targetShop) {
+            handleDeleteShop(targetShop._id);
+          }
+        }}
+        title="Delete Merchant Shop?"
+        description={`Are you sure you want to delete "${targetShop?.shopName}"? This will deactivate all associated products and permanently remove the shop. This action cannot be undone.`}
+        confirmLabel="Delete Shop"
+        variant="danger"
+        isLoading={loadingDeleteId === targetShop?._id}
       />
     </div>
   );

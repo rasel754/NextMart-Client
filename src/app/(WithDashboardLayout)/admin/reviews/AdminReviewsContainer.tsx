@@ -3,13 +3,14 @@
 import React, { useState, useEffect } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { Trash2, Star } from "lucide-react";
+import { Trash2, Star, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { deleteReview } from "@/services/review";
 import { DataTable } from "@/components/ui/core/DataTable";
 import { ConfirmModal } from "@/components/ui/core/ConfirmModal";
 import { IMeta } from "@/types/meta";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface AdminReviewsContainerProps {
   initialReviews: any[];
@@ -31,9 +32,18 @@ export default function AdminReviewsContainer({
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [targetReview, setTargetReview] = useState<any>(null);
 
+  // View details modal state
+  const [viewOpen, setViewOpen] = useState(false);
+  const [viewReview, setViewReview] = useState<any | null>(null);
+
   useEffect(() => {
     setReviews(initialReviews);
   }, [initialReviews]);
+
+  const triggerViewDetails = (reviewObj: any) => {
+    setViewReview(reviewObj);
+    setViewOpen(true);
+  };
 
   const handleDelete = async (reviewId: string) => {
     setLoadingDeleteId(reviewId);
@@ -146,15 +156,25 @@ export default function AdminReviewsContainer({
         const r = row.original;
         const isDeleting = loadingDeleteId === r._id;
         return (
-          <Button
-            variant="outline"
-            size="icon"
-            disabled={isDeleting}
-            className="h-8 w-8 rounded-full border-red-500/10 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
-            onClick={() => triggerDeleteConfirm(r)}
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-          </Button>
+          <div className="flex gap-1.5 justify-start">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-8 w-8 rounded-full border-primary/10 text-primary hover:bg-primary/5"
+              onClick={() => triggerViewDetails(r)}
+            >
+              <Eye className="w-3.5 h-3.5" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              disabled={isDeleting}
+              className="h-8 w-8 rounded-full border-red-500/10 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
+              onClick={() => triggerDeleteConfirm(r)}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </Button>
+          </div>
         );
       },
     },
@@ -207,6 +227,56 @@ export default function AdminReviewsContainer({
         variant="danger"
         isLoading={loadingDeleteId === targetReview?._id}
       />
+
+      <Dialog open={viewOpen} onOpenChange={setViewOpen}>
+        <DialogContent className="sm:max-w-[450px] rounded-3xl p-6">
+          <DialogHeader className="border-b pb-3 mb-4">
+            <DialogTitle className="text-lg font-black text-foreground">
+              Review Details
+            </DialogTitle>
+          </DialogHeader>
+
+          {viewReview && (
+            <div className="space-y-4 text-sm leading-relaxed">
+              <div className="flex flex-col">
+                <span className="text-[10px] text-muted-foreground uppercase font-black tracking-wider">Customer</span>
+                <span className="font-bold text-foreground">{typeof viewReview.user === "object" ? viewReview.user.name : "Platform Customer"}</span>
+                <span className="text-xs text-muted-foreground font-mono">{typeof viewReview.user === "object" ? viewReview.user.email : ""}</span>
+              </div>
+
+              <div className="flex flex-col">
+                <span className="text-[10px] text-muted-foreground uppercase font-black tracking-wider">Product</span>
+                <span className="font-bold text-foreground">{typeof viewReview.product === "object" ? viewReview.product.name : "Catalog Product"}</span>
+              </div>
+
+              <div className="flex flex-col">
+                <span className="text-[10px] text-muted-foreground uppercase font-black tracking-wider">Rating</span>
+                <div className="mt-1">{renderStars(viewReview.rating || 0)}</div>
+              </div>
+
+              <div className="flex flex-col bg-muted/30 dark:bg-muted/10 border border-muted-foreground/10 rounded-2xl p-4">
+                <span className="text-[10px] text-muted-foreground uppercase font-black tracking-wider mb-1">Feedback Comment</span>
+                <p className="text-xs text-foreground italic break-words">
+                  {"\""}{viewReview.comment || viewReview.text || viewReview.review || "No feedback comment was written."}{"\""}
+                </p>
+              </div>
+
+              <div className="flex flex-col">
+                <span className="text-[10px] text-muted-foreground uppercase font-black tracking-wider">Date Posted</span>
+                <span className="text-xs text-muted-foreground font-medium">
+                  {new Date(viewReview.createdAt).toLocaleString()}
+                </span>
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-end gap-2 border-t pt-4 mt-2">
+            <Button variant="outline" onClick={() => setViewOpen(false)} className="rounded-full font-bold h-9 text-xs px-5">
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

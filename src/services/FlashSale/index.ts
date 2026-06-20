@@ -54,3 +54,41 @@ export const deleteFlashSale = async (flashSaleId: string): Promise<any> => {
     return Error(error);
   }
 };
+
+// get All Flash Sale Schedules
+export const getFlashSaleSchedules = async () => {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/flash-sale/all-schedules`, {
+      headers: {
+        Authorization: (await cookies()).get("accessToken")?.value || "",
+      },
+      next: {
+        tags: ["PRODUCT"],
+      },
+    });
+    return await res.json();
+  } catch (error: any) {
+    return Error(error.message);
+  }
+};
+
+// update Flash Sale
+export const updateFlashSale = async (flashSaleId: string, payload: any): Promise<any> => {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_API}/flash-sale/${flashSaleId}`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: (await cookies()).get("accessToken")!.value,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      }
+    );
+    revalidateTag("PRODUCT");
+    return res.json();
+  } catch (error: any) {
+    return Error(error);
+  }
+};

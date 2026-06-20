@@ -15,10 +15,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Trash2, Tag, Plus } from "lucide-react";
+import { Trash2, Tag, Plus, Edit } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { createBrand, deleteBrand } from "@/services/Brand";
+import { createBrand, deleteBrand, updateBrand } from "@/services/Brand";
 import { DataTable } from "@/components/ui/core/DataTable";
 import { ConfirmModal } from "@/components/ui/core/ConfirmModal";
 import NMImageUploader from "@/components/ui/core/NMImageUploader";
@@ -41,11 +41,11 @@ export default function AdminBrandsContainer({
 }: AdminBrandsContainerProps) {
   const router = useRouter();
   const [brands, setBrands] = useState<any[]>(initialBrands);
-
   // Form State
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreview, setImagePreview] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editBrandId, setEditBrandId] = useState<string | null>(null);
 
   // Modal State
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -60,7 +60,7 @@ export default function AdminBrandsContainer({
   });
 
   const onSubmit: SubmitHandler<BrandFormValues> = async (data) => {
-    if (imageFiles.length === 0) {
+    if (imagePreview.length === 0 && imageFiles.length === 0) {
       toast.error("Please upload a brand logo.");
       return;
     }
@@ -69,27 +69,60 @@ export default function AdminBrandsContainer({
     try {
       const formData = new FormData();
       formData.append("data", JSON.stringify(data));
-      formData.append("logo", imageFiles[0]);
+      if (imageFiles.length > 0) {
+        formData.append("logo", imageFiles[0]);
+      }
 
-      const res = await createBrand(formData);
+      let res;
+      if (editBrandId) {
+        res = await updateBrand(editBrandId, formData);
+      } else {
+        res = await createBrand(formData);
+      }
+
       if (res?.success) {
-        toast.success(res?.message || "Brand created successfully.");
+        toast.success(res?.message || (editBrandId ? "Brand updated successfully." : "Brand created successfully."));
         form.reset();
         setImageFiles([]);
         setImagePreview([]);
+        setEditBrandId(null);
         
         router.refresh();
         if (res.data) {
-          setBrands((prev) => [res.data, ...prev]);
+          if (editBrandId) {
+            setBrands((prev) =>
+              prev.map((b) => (b._id === editBrandId ? res.data : b))
+            );
+          } else {
+            setBrands((prev) => [res.data, ...prev]);
+          }
         }
       } else {
-        toast.error(res?.message || "Failed to create brand.");
+        toast.error(res?.message || "Failed to save brand.");
       }
     } catch {
-      toast.error("An error occurred during brand creation.");
+      toast.error("An error occurred while saving the brand.");
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleStartEdit = (brandObj: any) => {
+    setEditBrandId(brandObj._id);
+    form.reset({
+      name: brandObj.name,
+    });
+    setImageFiles([]);
+    setImagePreview(brandObj.logo ? [brandObj.logo] : []);
+  };
+
+  const handleCancelEdit = () => {
+    setEditBrandId(null);
+    form.reset({
+      name: "",
+    });
+    setImageFiles([]);
+    setImagePreview([]);
   };
 
   const handleDelete = async (brandId: string) => {
@@ -115,7 +148,6 @@ export default function AdminBrandsContainer({
     setTargetBrand(brandObj);
     setDeleteOpen(true);
   };
-
   // Table Columns
   const columns: ColumnDef<any>[] = [
     {
@@ -156,15 +188,25 @@ export default function AdminBrandsContainer({
         const b = row.original;
         const isDeleting = loadingDeleteId === b._id;
         return (
-          <Button
-            variant="outline"
-            size="icon"
-            disabled={isDeleting}
-            className="h-8 w-8 rounded-full border-red-500/10 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
-            onClick={() => triggerDeleteConfirm(b)}
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-8 w-8 rounded-full border-primary/10 text-primary hover:bg-primary/5"
+              onClick={() => handleStartEdit(b)}
+            >
+              <Edit className="w-3.5 h-3.5" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              disabled={isDeleting}
+              className="h-8 w-8 rounded-full border-red-500/10 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
+              onClick={() => triggerDeleteConfirm(b)}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </Button>
+          </div>
         );
       },
     },
@@ -183,8 +225,17 @@ export default function AdminBrandsContainer({
         {/* Left Column: Create Form */}
         <div className="bg-card border border-border/60 p-6 rounded-3xl shadow-sm space-y-4">
           <h3 className="font-black text-sm text-foreground border-b pb-2 flex gap-1.5 items-center">
-            <Plus className="w-4 h-4 text-primary" />
-            Create Product Brand
+            {editBrandId ? (
+              <>
+                <Edit className="w-4 h-4 text-primary" />
+                Update Product Brand
+              </>
+            ) : (
+              <>
+                <Plus className="w-4 h-4 text-primary" />
+                Create Product Brand
+              </>
+            )}
           </h3>
 
           <Form {...form}>
@@ -224,13 +275,31 @@ export default function AdminBrandsContainer({
                 )}
               </div>
 
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full rounded-full font-bold h-9 text-xs mt-2"
-              >
-                {isSubmitting ? "Creating..." : "Create Brand"}
-              </Button>
+              <div className="flex gap-2 mt-2">
+                {editBrandId && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleCancelEdit}
+                    className="flex-1 rounded-full font-bold h-9 text-xs"
+                  >
+                    Cancel
+                  </Button>
+                )}
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className={`${editBrandId ? "flex-1" : "w-full"} rounded-full font-bold h-9 text-xs`}
+                >
+                  {isSubmitting
+                    ? editBrandId
+                      ? "Updating..."
+                      : "Creating..."
+                    : editBrandId
+                    ? "Update Brand"
+                    : "Create Brand"}
+                </Button>
+              </div>
             </form>
           </Form>
         </div>

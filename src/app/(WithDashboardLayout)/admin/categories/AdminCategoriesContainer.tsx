@@ -16,10 +16,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Trash2, ShoppingBag, Plus } from "lucide-react";
+import { Trash2, ShoppingBag, Plus, Edit } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { createCategory, deleteCategory } from "@/services/Category";
+import { createCategory, deleteCategory, updateCategory } from "@/services/Category";
 import { DataTable } from "@/components/ui/core/DataTable";
 import { ConfirmModal } from "@/components/ui/core/ConfirmModal";
 import NMImageUploader from "@/components/ui/core/NMImageUploader";
@@ -42,12 +42,14 @@ export default function AdminCategoriesContainer({
   initialCategories = [],
 }: AdminCategoriesContainerProps) {
   const router = useRouter();
+
   const [categories, setCategories] = useState<any[]>(initialCategories);
 
   // Form State
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreview, setImagePreview] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editCategoryId, setEditCategoryId] = useState<string | null>(null);
 
   // Modal State
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -63,7 +65,7 @@ export default function AdminCategoriesContainer({
   });
 
   const onSubmit: SubmitHandler<CategoryFormValues> = async (data) => {
-    if (imageFiles.length === 0) {
+    if (imagePreview.length === 0 && imageFiles.length === 0) {
       toast.error("Please upload a category icon.");
       return;
     }
@@ -72,30 +74,62 @@ export default function AdminCategoriesContainer({
     try {
       const formData = new FormData();
       formData.append("data", JSON.stringify(data));
-      formData.append("icon", imageFiles[0]);
+      if (imageFiles.length > 0) {
+        formData.append("icon", imageFiles[0]);
+      }
 
-      const res = await createCategory(formData);
+      let res;
+      if (editCategoryId) {
+        res = await updateCategory(editCategoryId, formData);
+      } else {
+        res = await createCategory(formData);
+      }
+
       if (res?.success) {
-        toast.success(res?.message || "Category created successfully.");
+        toast.success(res?.message || (editCategoryId ? "Category updated successfully." : "Category created successfully."));
         form.reset();
         setImageFiles([]);
         setImagePreview([]);
+        setEditCategoryId(null);
         
-        // Add new category locally or refresh server data
         router.refresh();
-        // Since we refresh, let's fetch list from page. Next.js refresh re-runs server component page
-        // But let's also update locally in case Next.js caching delays it
         if (res.data) {
-          setCategories((prev) => [res.data, ...prev]);
+          if (editCategoryId) {
+            setCategories((prev) =>
+              prev.map((c) => (c._id === editCategoryId ? res.data : c))
+            );
+          } else {
+            setCategories((prev) => [res.data, ...prev]);
+          }
         }
       } else {
-        toast.error(res?.message || "Failed to create category.");
+        toast.error(res?.message || "Failed to save category.");
       }
     } catch {
-      toast.error("An error occurred during category creation.");
+      toast.error("An error occurred while saving the category.");
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleStartEdit = (categoryObj: any) => {
+    setEditCategoryId(categoryObj._id);
+    form.reset({
+      name: categoryObj.name,
+      description: categoryObj.description || "",
+    });
+    setImageFiles([]);
+    setImagePreview(categoryObj.icon ? [categoryObj.icon] : []);
+  };
+
+  const handleCancelEdit = () => {
+    setEditCategoryId(null);
+    form.reset({
+      name: "",
+      description: "",
+    });
+    setImageFiles([]);
+    setImagePreview([]);
   };
 
   const handleDelete = async (categoryId: string) => {
@@ -121,7 +155,6 @@ export default function AdminCategoriesContainer({
     setTargetCategory(categoryObj);
     setDeleteOpen(true);
   };
-
   // Table Columns
   const columns: ColumnDef<any>[] = [
     {
@@ -162,15 +195,25 @@ export default function AdminCategoriesContainer({
         const c = row.original;
         const isDeleting = loadingDeleteId === c._id;
         return (
-          <Button
-            variant="outline"
-            size="icon"
-            disabled={isDeleting}
-            className="h-8 w-8 rounded-full border-red-500/10 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
-            onClick={() => triggerDeleteConfirm(c)}
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-8 w-8 rounded-full border-primary/10 text-primary hover:bg-primary/5"
+              onClick={() => handleStartEdit(c)}
+            >
+              <Edit className="w-3.5 h-3.5" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              disabled={isDeleting}
+              className="h-8 w-8 rounded-full border-red-500/10 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
+              onClick={() => triggerDeleteConfirm(c)}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </Button>
+          </div>
         );
       },
     },
@@ -189,8 +232,17 @@ export default function AdminCategoriesContainer({
         {/* Left Column: Create Form */}
         <div className="bg-card border border-border/60 p-6 rounded-3xl shadow-sm space-y-4">
           <h3 className="font-black text-sm text-foreground border-b pb-2 flex gap-1.5 items-center">
-            <Plus className="w-4 h-4 text-primary" />
-            Create Product Category
+            {editCategoryId ? (
+              <>
+                <Edit className="w-4 h-4 text-primary" />
+                Update Product Category
+              </>
+            ) : (
+              <>
+                <Plus className="w-4 h-4 text-primary" />
+                Create Product Category
+              </>
+            )}
           </h3>
 
           <Form {...form}>
@@ -244,14 +296,31 @@ export default function AdminCategoriesContainer({
                   />
                 )}
               </div>
-
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full rounded-full font-bold h-9 text-xs mt-2"
-              >
-                {isSubmitting ? "Creating..." : "Create Category"}
-              </Button>
+              <div className="flex gap-2 mt-2">
+                {editCategoryId && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleCancelEdit}
+                    className="flex-1 rounded-full font-bold h-9 text-xs"
+                  >
+                    Cancel
+                  </Button>
+                )}
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className={`${editCategoryId ? "flex-1" : "w-full"} rounded-full font-bold h-9 text-xs`}
+                >
+                  {isSubmitting
+                    ? editCategoryId
+                      ? "Updating..."
+                      : "Creating..."
+                    : editCategoryId
+                    ? "Update Category"
+                    : "Create Category"}
+                </Button>
+              </div>
             </form>
           </Form>
         </div>

@@ -1,10 +1,10 @@
-import { getFlashSaleProducts } from "@/services/FlashSale";
+import { getFlashSaleSchedules } from "@/services/FlashSale";
 import { getAllProducts } from "@/services/product";
 import AdminFlashSalesContainer from "./AdminFlashSalesContainer";
 
 export default async function AdminFlashSalesPage() {
   const [flashSaleRes, productsRes] = await Promise.all([
-    getFlashSaleProducts(),
+    getFlashSaleSchedules(),
     getAllProducts({ limit: 100 }), // retrieve products for select options
   ]);
 

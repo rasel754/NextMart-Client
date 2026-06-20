@@ -66,3 +66,23 @@ export const validateCoupon = async (code: string) => {
     return Error(error.message);
   }
 };
+
+export const updateCoupon = async (couponCode: string, couponData: any) => {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_API}/coupon/${couponCode}/update-coupon`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: (await cookies()).get("accessToken")?.value || "",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(couponData),
+      }
+    );
+    revalidateTag("COUPON");
+    return await res.json();
+  } catch (error: any) {
+    return Error(error.message);
+  }
+};

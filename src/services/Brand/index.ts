@@ -52,3 +52,25 @@ export const deleteBrand = async (brandId: string): Promise<any> => {
     return Error(error);
   }
 };
+
+export const updateBrand = async (
+  brandId: string,
+  data: FormData
+): Promise<any> => {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_API}/brand/${brandId}`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: (await cookies()).get("accessToken")!.value,
+        },
+        body: data,
+      }
+    );
+    revalidateTag("Brands");
+    return res.json();
+  } catch (error: any) {
+    return Error(error);
+  }
+};

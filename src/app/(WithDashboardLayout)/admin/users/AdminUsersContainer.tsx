@@ -30,29 +30,47 @@ export default function AdminUsersContainer({
   const [users, setUsers] = useState<any[]>(initialUsers);
   const [loadingUserId, setLoadingUserId] = useState<string | null>(null);
 
-  // Confirm modal state
+  // Confirm modal state for status (banning)
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [modalTargetUser, setModalTargetUser] = useState<any>(null);
+
+  // Confirm modal state for role changes
+  const [roleConfirmOpen, setRoleConfirmOpen] = useState(false);
+  const [targetRoleUser, setTargetRoleUser] = useState<any>(null);
+  const [pendingRole, setPendingRole] = useState<string | null>(null);
 
   useEffect(() => {
     setUsers(initialUsers);
   }, [initialUsers]);
 
-  // Sync state mutations to server and locally
+  // Sync state mutations to server and locally (with optimistic update and rollback)
   const handleUpdateStatus = async (userId: string, newStatus: string) => {
+    const originalUser = users.find((u) => u._id === userId);
+    const originalStatus = originalUser?.status || "active";
+
+    // Optimistic UI update
+    setUsers((prev) =>
+      prev.map((u) => (u._id === userId ? { ...u, status: newStatus } : u))
+    );
+
     setLoadingUserId(userId);
     try {
       const res = await updateUserStatus(userId, newStatus);
       if (res?.success) {
         toast.success(`User status updated to ${newStatus} successfully.`);
-        setUsers((prev) =>
-          prev.map((u) => (u._id === userId ? { ...u, status: newStatus } : u))
-        );
         router.refresh();
       } else {
+        // Rollback
+        setUsers((prev) =>
+          prev.map((u) => (u._id === userId ? { ...u, status: originalStatus } : u))
+        );
         toast.error(res?.message || "Failed to update user status.");
       }
     } catch {
+      // Rollback
+      setUsers((prev) =>
+        prev.map((u) => (u._id === userId ? { ...u, status: originalStatus } : u))
+      );
       toast.error("An error occurred during updating status.");
     } finally {
       setLoadingUserId(null);
@@ -77,6 +95,9 @@ export default function AdminUsersContainer({
       toast.error("An error occurred during updating role.");
     } finally {
       setLoadingUserId(null);
+      setRoleConfirmOpen(false);
+      setTargetRoleUser(null);
+      setPendingRole(null);
     }
   };
 
@@ -84,6 +105,12 @@ export default function AdminUsersContainer({
   const triggerBanConfirm = (userObj: any) => {
     setModalTargetUser(userObj);
     setConfirmOpen(true);
+  };
+
+  const triggerRoleConfirm = (userObj: any, newRole: string) => {
+    setTargetRoleUser(userObj);
+    setPendingRole(newRole);
+    setRoleConfirmOpen(true);
   };
 
   // Filter updates
@@ -197,7 +224,7 @@ export default function AdminUsersContainer({
             <Select
               disabled={isSelfLoading}
               value={u.role}
-              onValueChange={(val) => handleUpdateRole(u._id, val)}
+              onValueChange={(val) => triggerRoleConfirm(u, val)}
             >
               <SelectTrigger className="w-[110px] h-8 rounded-full text-[10px] font-bold">
                 <SelectValue />
@@ -318,6 +345,25 @@ export default function AdminUsersContainer({
         confirmLabel="Ban Account"
         variant="danger"
         isLoading={loadingUserId === modalTargetUser?._id}
+      />
+
+      <ConfirmModal
+        isOpen={roleConfirmOpen}
+        onClose={() => {
+          setRoleConfirmOpen(false);
+          setTargetRoleUser(null);
+          setPendingRole(null);
+        }}
+        onConfirm={() => {
+          if (targetRoleUser && pendingRole) {
+            handleUpdateRole(targetRoleUser._id, pendingRole);
+          }
+        }}
+        title="Change User Role?"
+        description={`Are you sure you want to change the role of "${targetRoleUser?.name}" to "${pendingRole}"?`}
+        confirmLabel="Change Role"
+        variant="warning"
+        isLoading={loadingUserId === targetRoleUser?._id}
       />
     </div>
   );

@@ -61,3 +61,18 @@ export const toggleShopStatus = async (shopId: string, status: string) => {
     return Error(error.message);
   }
 };
+
+export const deleteShop = async (shopId: string) => {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/shop/${shopId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: (await cookies()).get("accessToken")?.value || "",
+      },
+    });
+    revalidateTag("SHOP");
+    return await res.json();
+  } catch (error: any) {
+    return Error(error.message);
+  }
+};
