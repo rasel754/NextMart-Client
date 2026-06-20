@@ -72,6 +72,9 @@ export default function Navbar() {
     return pathname.startsWith(href);
   };
 
+  const isAuthPage = pathname === "/login" || pathname === "/register";
+  const loginUrl = isAuthPage ? "/login" : `/login?redirectPath=${encodeURIComponent(pathname)}`;
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/85 backdrop-blur-md">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
@@ -195,7 +198,7 @@ export default function Navbar() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Link href="/login">
+            <Link href={loginUrl}>
               <Button className="rounded-full" size="sm">
                 Login
               </Button>
@@ -231,7 +234,7 @@ export default function Navbar() {
           ))}
           {!user && (
             <div className="pt-2">
-              <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+              <Link href={loginUrl} onClick={() => setMobileMenuOpen(false)}>
                 <Button className="w-full rounded-full">Login</Button>
               </Link>
             </div>

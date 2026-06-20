@@ -37,12 +37,20 @@ export function NavMain({
 }) {
   const pathname = usePathname();
 
+  // Find the menu item that has the longest matching URL prefix for the current pathname
+  const activeItem = items
+    .filter((item) => pathname === item.url || pathname.startsWith(item.url + "/"))
+    .reduce<typeof items[number] | null>(
+      (best, item) => (!best || item.url.length > best.url.length ? item : best),
+      null
+    );
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Menu</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => {
-          const isItemActive = pathname === item.url || pathname.startsWith(item.url + "/");
+          const isItemActive = activeItem?.url === item.url;
           return (
             <Collapsible key={item.title} asChild defaultOpen={item.isActive || isItemActive}>
               <SidebarMenuItem>

@@ -21,11 +21,14 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Logo from "@/assets/svgs/Logo";
 import { Eye, EyeOff, AlertTriangle } from "lucide-react";
+import { jwtDecode } from "jwt-decode";
+import { useUser } from "@/context/UserContext";
 
 export default function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirectPath");
+  const { setIsLoading } = useUser();
 
   const [showPassword, setShowPassword] = useState(false);
   const [reCaptchaStatus, setReCaptchaStatus] = useState(false);
@@ -60,10 +63,22 @@ export default function LoginForm() {
       const res = await loginUser(data);
       if (res?.success) {
         toast.success(res?.message || "Logged in successfully!");
+        setIsLoading(true);
+
+        let role = "user";
+        try {
+          const decoded = jwtDecode<any>(res.data.accessToken);
+          role = decoded?.role || "user";
+        } catch (err) {
+          console.error("Error decoding token:", err);
+        }
+
         if (redirect) {
           router.push(redirect);
+        } else if (role === "admin") {
+          router.push("/admin");
         } else {
-          router.push("/cart");
+          router.push("/user/dashboard");
         }
       } else {
         setErrorMessage(res?.message || "Invalid email or password.");
@@ -105,7 +120,7 @@ export default function LoginForm() {
           variant="outline"
           size="sm"
           className="rounded-full text-xs font-semibold"
-          onClick={() => handleDemoLogin("admin@nextmart.com", "Admin@1234")}
+          onClick={() => handleDemoLogin("admin.example@gmail.com", "adminPassword@1")}
         >
           Demo Admin
         </Button>
@@ -114,7 +129,7 @@ export default function LoginForm() {
           variant="outline"
           size="sm"
           className="rounded-full text-xs font-semibold"
-          onClick={() => handleDemoLogin("user@nextmart.com", "User@1234")}
+          onClick={() => handleDemoLogin("user.example@gmail.com", "userPassword@1")}
         >
           Demo User
         </Button>
