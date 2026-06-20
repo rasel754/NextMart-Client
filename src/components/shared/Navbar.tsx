@@ -21,6 +21,7 @@ import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
 import { useAppSelector } from "@/redux/hooks";
 import { orderedProductsSelector } from "@/redux/featurs/cartSlice";
+import { useWishlist } from "@/hooks/useWishlist";
 
 export default function Navbar() {
   const { user, setIsLoading } = useUser();
@@ -47,13 +48,22 @@ export default function Navbar() {
     }
   };
 
+  const { wishlistCount } = useWishlist();
+
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/products", label: "Products" },
+    { href: "/flash-sales", label: "Flash Sales" },
     { href: "/about", label: "About" },
     { href: "/contact", label: "Contact" },
-    { href: "/faq", label: "FAQ" },
   ];
+
+  if (user) {
+    navLinks.push({
+      href: user.role === "admin" ? "/admin" : "/user/dashboard",
+      label: "Dashboard",
+    });
+  }
 
   const isActive = (href: string) => {
     if (href === "/") {
@@ -111,6 +121,11 @@ export default function Navbar() {
           <Link href={user ? (user.role === "admin" ? "/admin" : "/user/dashboard/wishlist") : "/login"}>
             <Button variant="ghost" size="icon" className="rounded-full relative">
               <Heart className="h-5 w-5" />
+              {wishlistCount > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                  {wishlistCount}
+                </span>
+              )}
             </Button>
           </Link>
 
@@ -157,11 +172,18 @@ export default function Navbar() {
                   <Link href={user.role === "admin" ? "/admin" : "/user/dashboard"}>Dashboard</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem className="cursor-pointer" asChild>
-                  <Link href="/cart">My Orders</Link>
+                  <Link href={user.role === "admin" ? "/admin/orders" : "/user/dashboard/orders"}>My Orders</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem className="cursor-pointer" asChild>
                   <Link href={user.role === "admin" ? "/admin/profile" : "/user/dashboard/profile"}>Settings</Link>
                 </DropdownMenuItem>
+                {user.role !== "admin" && (
+                  <DropdownMenuItem className="cursor-pointer" asChild>
+                    <Link href={user.hasShop ? "/user/shop/products" : "/create-shop"}>
+                      {user.hasShop ? "Manage Shop" : "Create Shop"}
+                    </Link>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   className="cursor-pointer bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground focus:bg-destructive focus:text-destructive-foreground font-semibold"

@@ -15,7 +15,7 @@ const FlashSale = async () => {
         <div className="flex items-center justify-between">
           <h2 className="font-bold text-2xl">Flash Sale</h2>
           <CountDown></CountDown>
-          <Link href="/products">
+          <Link href="/flash-sales">
             <Button variant="outline" className="rounded-full">
               All Collection
             </Button>

@@ -105,18 +105,18 @@ export default function LoginForm() {
           variant="outline"
           size="sm"
           className="rounded-full text-xs font-semibold"
-          onClick={() => handleDemoLogin("admin.example@gmail.com", "adminPassword@1")}
+          onClick={() => handleDemoLogin("admin@nextmart.com", "Admin@1234")}
         >
-          Demo Admin Login
+          Demo Admin
         </Button>
         <Button
           type="button"
           variant="outline"
           size="sm"
           className="rounded-full text-xs font-semibold"
-          onClick={() => handleDemoLogin("user.example@gmail.com", "userPassword@1")}
+          onClick={() => handleDemoLogin("user@nextmart.com", "User@1234")}
         >
-          Demo User Login
+          Demo User
         </Button>
       </div>
 
@@ -141,7 +141,15 @@ export default function LoginForm() {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Password</FormLabel>
+                <div className="flex justify-between items-center">
+                  <FormLabel>Password</FormLabel>
+                  <Link
+                    href="/forgot-password"
+                    className="text-xs text-primary hover:underline font-semibold"
+                  >
+                    Forgot Password?
+                  </Link>
+                </div>
                 <FormControl>
                   <div className="relative">
                     <Input

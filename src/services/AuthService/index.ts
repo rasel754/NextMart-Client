@@ -97,3 +97,48 @@ export const changePassword = async (passwords: { oldPassword: string; newPasswo
     return Error(error);
   }
 };
+
+export const forgotPassword = async (email: string) => {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/auth/forgot-password`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email }),
+    });
+    return await res.json();
+  } catch (error: any) {
+    return Error(error.message);
+  }
+};
+
+export const verifyOtp = async (email: string, otp: string) => {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/auth/verify-otp`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, otp }),
+    });
+    return await res.json();
+  } catch (error: any) {
+    return Error(error.message);
+  }
+};
+
+export const resetPassword = async (passwordData: any) => {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/auth/reset-password`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(passwordData),
+    });
+    return await res.json();
+  } catch (error: any) {
+    return Error(error.message);
+  }
+};

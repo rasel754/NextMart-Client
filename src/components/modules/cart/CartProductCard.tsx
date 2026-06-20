@@ -1,6 +1,13 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { curencyFormatter } from "@/lib/currencyFormatter";
-import { decrementOrderedQuantity, ICartProduct, incrementOrderedQuantity, removeProduct } from "@/redux/featurs/cartSlice";
+import {
+  decrementOrderedQuantity,
+  ICartProduct,
+  incrementOrderedQuantity,
+  removeProduct,
+} from "@/redux/featurs/cartSlice";
 import { useAppDispatch } from "@/redux/hooks";
 import { Minus, Plus, Trash } from "lucide-react";
 import Image from "next/image";
@@ -8,61 +15,80 @@ import Image from "next/image";
 export default function CartProductCard({ product }: { product: ICartProduct }) {
   const dispatch = useAppDispatch();
 
-  const handleIncrementQuantity = (id:string) => {
+  const handleIncrementQuantity = (id: string) => {
     dispatch(incrementOrderedQuantity(id));
-  }
+  };
 
-    const handleDecrementQuantity = (id:string) => {
+  const handleDecrementQuantity = (id: string) => {
     dispatch(decrementOrderedQuantity(id));
-  }
+  };
 
-  const handleRemoveProduct = (id:string) => {
+  const handleRemoveProduct = (id: string) => {
     dispatch(removeProduct(id));
-  } 
-
+  };
 
   return (
-    <div className="bg-white rounded-lg flex p-5 gap-5">
-      <div className="h-full w-32 rounded-md overflow-hidden">
+    <div className="bg-card/50 border border-border/60 rounded-2xl flex flex-col sm:flex-row p-4 gap-4 shadow-sm">
+      {/* Product Image */}
+      <div className="relative h-28 w-28 mx-auto sm:mx-0 rounded-xl overflow-hidden border shrink-0">
         <Image
-          src={product?.imageUrls?.[0]}
-          height={200}
-          width={200}
+          src={product?.imageUrls?.[0] || "https://psediting.websites.co.in/obaju-turquoise/img/product-placeholder.png"}
+          height={150}
+          width={150}
           alt="product"
           className="aspect-square object-cover"
         />
       </div>
-      <div className="flex flex-col justify-between flex-grow">
-        <h1 className="text-xl font-semibold">{product?.name}</h1>
-        <div className="flex gap-5 my-2">
-          <p>
-            <span className="text-gray-500">Color:</span>{" "}
-            <span className="font-semibold">Black</span>
-          </p>
-          <p>
-            <span className="text-gray-500">Stock Availability:</span>{" "}
-            <span className="font-semibold">{product?.stock}</span>
-          </p>
-        </div>
-        <hr className="my-1" />
-        <div className="flex items-center justify-between">
-          <h2>
-            Price:
-            {product.offerPrice ? curencyFormatter(product.offerPrice) :curencyFormatter(product.price)}
-          </h2>
-          <div className="flex items-center gap-2">
-            <p className="text-gray-500 font-semibold">Quantity</p>
-            <Button onClick={()=>handleDecrementQuantity(product._id)} variant="outline" className="size-8 rounded-sm">
-              <Minus />
-            </Button>
-            <p className="font-semibold text-xl p-2">
-             {product?.orderedQuantity}
+
+      {/* Details info */}
+      <div className="flex flex-col justify-between flex-grow text-sm">
+        <div>
+          <h3 className="text-base font-bold text-foreground line-clamp-1">{product?.name}</h3>
+          <div className="flex gap-4 my-1.5 text-xs text-muted-foreground">
+            <p>
+              <span>Color:</span> <span className="font-bold text-foreground">White</span>
             </p>
-            <Button onClick={()=>handleIncrementQuantity(product._id)} variant="outline" className="size-8 rounded-sm">
-              <Plus />
+            <p>
+              <span>Stock:</span> <span className="font-bold text-foreground">{product?.stock}</span>
+            </p>
+          </div>
+        </div>
+
+        <hr className="border-border/40 my-2" />
+
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <h4 className="font-extrabold text-foreground">
+            Price: {product.offerPrice ? curencyFormatter(product.offerPrice) : curencyFormatter(product.price)}
+          </h4>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground font-semibold">Quantity</span>
+            <Button
+              onClick={() => handleDecrementQuantity(product._id)}
+              variant="outline"
+              disabled={product.orderedQuantity <= 1}
+              className="w-7 h-7 p-0 rounded-full"
+            >
+              <Minus className="w-3.5 h-3.5" />
             </Button>
-            <Button onClick={() => handleRemoveProduct(product._id)} variant="outline" className="size-8 rounded-sm">
-              <Trash className="text-red-500/50" />
+            <span className="font-bold text-sm min-w-[20px] text-center">
+              {product?.orderedQuantity}
+            </span>
+            <Button
+              onClick={() => handleIncrementQuantity(product._id)}
+              variant="outline"
+              disabled={product.orderedQuantity >= product.stock}
+              className="w-7 h-7 p-0 rounded-full"
+            >
+              <Plus className="w-3.5 h-3.5" />
+            </Button>
+            <Button
+              onClick={() => handleRemoveProduct(product._id)}
+              variant="ghost"
+              size="icon"
+              className="w-7 h-7 rounded-full text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40"
+            >
+              <Trash className="w-3.5 h-3.5" />
             </Button>
           </div>
         </div>

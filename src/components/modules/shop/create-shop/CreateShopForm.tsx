@@ -10,7 +10,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { Textarea } from "@/components/ui/textarea";
 import NMImageUploader from "@/components/ui/core/NMImageUploader";
 import { useState } from "react";
@@ -18,18 +18,60 @@ import ImagePreviewer from "@/components/ui/core/NMImageUploader/ImagePreviewer"
 import { createShop } from "@/services/Shop";
 import { toast } from "sonner";
 import Logo from "@/assets/svgs/Logo";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+
+const shopSchema = z.object({
+  shopName: z.string().min(3, "Shop Name must be at least 3 characters"),
+  businessLicenseNumber: z.string().min(1, "Business License Number is required"),
+  address: z.string().min(1, "Address is required"),
+  contactNumber: z.string().min(1, "Contact Number is required"),
+  website: z.string().url("Please enter a valid website URL").or(z.literal("")),
+  establishedYear: z.string().regex(/^\d{4}$/, "Established Year must be a 4-digit number"),
+  taxIdentificationNumber: z.string().min(1, "Tax Identification Number is required"),
+  servicesOffered: z.string().min(10, "Services Offered description must be at least 10 characters long"),
+  socialMediaLinks: z.object({
+    facebook: z.string().url("Please enter a valid URL").or(z.literal("")),
+    twitter: z.string().url("Please enter a valid URL").or(z.literal("")),
+    instagram: z.string().url("Please enter a valid URL").or(z.literal("")),
+  }).optional(),
+});
+
+type ShopFormValues = z.infer<typeof shopSchema>;
 
 export default function CreateShopForm() {
   const [imageFiles, setImageFiles] = useState<File[] | []>([]);
   const [imagePreview, setImagePreview] = useState<string[] | []>([]);
 
-  const form = useForm();
+  const form = useForm<ShopFormValues>({
+    resolver: zodResolver(shopSchema),
+    defaultValues: {
+      shopName: "",
+      businessLicenseNumber: "",
+      address: "",
+      contactNumber: "",
+      website: "",
+      establishedYear: "",
+      taxIdentificationNumber: "",
+      servicesOffered: "",
+      socialMediaLinks: {
+        facebook: "",
+        twitter: "",
+        instagram: "",
+      },
+    },
+  });
 
   const {
     formState: { isSubmitting },
   } = form;
 
-  const onSubmit: SubmitHandler<FieldValues> = async (data) => {
+  const onSubmit: SubmitHandler<ShopFormValues> = async (data) => {
+    if (imageFiles.length === 0) {
+      toast.error("Please upload a shop logo");
+      return;
+    }
+
     const servicesOffered = data?.servicesOffered
       .split(",")
       .map((service: string) => service.trim())
@@ -48,38 +90,42 @@ export default function CreateShopForm() {
 
       const res = await createShop(formData);
 
-      // console.log(res);
-
       if (res.success) {
-        toast.success(res.message);
+        toast.success(res.message || "Shop created successfully!");
+        form.reset();
+        setImageFiles([]);
+        setImagePreview([]);
+      } else {
+        toast.error(res?.message || "Failed to create shop");
       }
     } catch (err: any) {
+      toast.error("An error occurred. Please try again.");
       console.error(err);
     }
   };
 
   return (
-    <div className="border-2 border-gray-300 rounded-xl flex-grow max-w-2xl p-5 my-5">
-      <div className="flex items-center space-x-4 mb-5">
+    <div className="border border-border/60 bg-card rounded-3xl flex-grow max-w-2xl p-6 md:p-8 my-5 shadow-sm">
+      <div className="flex items-center space-x-4 mb-6">
         <Logo />
         <div>
-          <h1 className="text-xl font-semibold">Create Your Shop</h1>
-          <p className="font-extralight text-sm text-gray-600">
+          <h1 className="text-xl font-black text-foreground">Create Your Shop</h1>
+          <p className="text-xs text-muted-foreground">
             Join us today and start your journey!
           </p>
         </div>
       </div>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <FormField
               control={form.control}
               name="shopName"
               render={({ field }) => (
-                <FormItem className="mb-3">
+                <FormItem>
                   <FormLabel>Shop Name</FormLabel>
                   <FormControl>
-                    <Input {...field} value={field.value || ""} />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -92,7 +138,7 @@ export default function CreateShopForm() {
                 <FormItem>
                   <FormLabel>Business License Number</FormLabel>
                   <FormControl>
-                    <Input {...field} value={field.value || ""} />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -106,7 +152,7 @@ export default function CreateShopForm() {
                 <FormItem>
                   <FormLabel>Address</FormLabel>
                   <FormControl>
-                    <Input {...field} value={field.value || ""} />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -119,7 +165,7 @@ export default function CreateShopForm() {
                 <FormItem>
                   <FormLabel>Contact Number</FormLabel>
                   <FormControl>
-                    <Input {...field} value={field.value || ""} />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -132,7 +178,7 @@ export default function CreateShopForm() {
                 <FormItem>
                   <FormLabel>Website</FormLabel>
                   <FormControl>
-                    <Input {...field} value={field.value || ""} />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -144,9 +190,9 @@ export default function CreateShopForm() {
               name="establishedYear"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Established Year</FormLabel>
+                  <FormLabel>Established Year (e.g. 2024)</FormLabel>
                   <FormControl>
-                    <Input {...field} value={field.value || ""} />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -159,7 +205,7 @@ export default function CreateShopForm() {
                 <FormItem>
                   <FormLabel>Tax Identification Number</FormLabel>
                   <FormControl>
-                    <Input {...field} value={field.value || ""} />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -173,7 +219,7 @@ export default function CreateShopForm() {
                 <FormItem>
                   <FormLabel>Facebook</FormLabel>
                   <FormControl>
-                    <Input {...field} value={field.value || ""} />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -186,7 +232,7 @@ export default function CreateShopForm() {
                 <FormItem>
                   <FormLabel>Twitter</FormLabel>
                   <FormControl>
-                    <Input {...field} value={field.value || ""} />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -199,7 +245,7 @@ export default function CreateShopForm() {
                 <FormItem>
                   <FormLabel>Instagram</FormLabel>
                   <FormControl>
-                    <Input {...field} value={field.value || ""} />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -214,12 +260,11 @@ export default function CreateShopForm() {
                 name="servicesOffered"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Services Offered</FormLabel>
+                    <FormLabel>Services Offered (Comma separated description)</FormLabel>
                     <FormControl>
                       <Textarea
-                        className="h-36"
+                        className="h-36 rounded-2xl"
                         {...field}
-                        value={field.value || ""}
                       />
                     </FormControl>
                     <FormMessage />
@@ -246,8 +291,8 @@ export default function CreateShopForm() {
             )}
           </div>
 
-          <Button type="submit" className="mt-5 w-full">
-            {isSubmitting ? "Creating...." : "Create"}
+          <Button type="submit" disabled={isSubmitting} className="mt-5 w-full rounded-full font-bold">
+            {isSubmitting ? "Creating...." : "Create Shop"}
           </Button>
         </form>
       </Form>

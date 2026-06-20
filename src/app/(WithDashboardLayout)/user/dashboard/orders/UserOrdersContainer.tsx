@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ChevronLeft, ChevronRight, Eye } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { IMeta } from "@/types/meta";
+import { useState } from "react";
+import OrderDetailModal from "@/components/ui/core/OrderDetailModal";
 
 interface UserOrdersContainerProps {
   orders: any[];
@@ -17,6 +19,14 @@ export default function UserOrdersContainer({ orders = [], meta }: UserOrdersCon
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+
+  const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleOpenDetails = (order: any) => {
+    setSelectedOrder(order);
+    setIsModalOpen(true);
+  };
 
   const handleStatusFilter = (val: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -114,7 +124,13 @@ export default function UserOrdersContainer({ orders = [], meta }: UserOrdersCon
                       {getStatusBadge(order.status)}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="icon" className="rounded-full" title="View Details">
+                      <Button
+                        onClick={() => handleOpenDetails(order)}
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full"
+                        title="View Details"
+                      >
                         <Eye className="w-4 h-4" />
                       </Button>
                     </TableCell>
@@ -173,6 +189,12 @@ export default function UserOrdersContainer({ orders = [], meta }: UserOrdersCon
           </Button>
         </div>
       )}
+
+      <OrderDetailModal
+        isOpen={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        order={selectedOrder}
+      />
     </div>
   );
 }

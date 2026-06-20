@@ -46,6 +46,22 @@ export const createReview = async (reviewData: { product: string; rating: number
   }
 };
 
+export const updateReview = async (reviewId: string, reviewData: { rating: number; comment: string }) => {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/review/${reviewId}`, {
+      method: "PATCH",
+      headers: {
+        Authorization: (await cookies()).get("accessToken")?.value || "",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(reviewData),
+    });
+    return await res.json();
+  } catch (error: any) {
+    return Error(error.message);
+  }
+};
+
 export const deleteReview = async (reviewId: string) => {
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/review/${reviewId}`, {

@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Star } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { getAllCategories } from "@/services/Category";
 import { getAllBrands } from "@/services/Brand";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -23,10 +23,12 @@ export default function FilterSidebar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const [price, setPrice] = useState([500000]);
   const [categories, setCategories] = useState<{ _id: string; name: string }[]>([]);
   const [brands, setBrands] = useState<{ _id: string; name: string }[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  const [minPrice, setMinPrice] = useState(searchParams.get("minPrice") || "");
+  const [maxPrice, setMaxPrice] = useState(searchParams.get("maxPrice") || "");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -49,12 +51,8 @@ export default function FilterSidebar() {
 
   // Sync state with URL params
   useEffect(() => {
-    const maxPrice = searchParams.get("maxPrice");
-    if (maxPrice) {
-      setPrice([Number(maxPrice)]);
-    } else {
-      setPrice([500000]);
-    }
+    setMinPrice(searchParams.get("minPrice") || "");
+    setMaxPrice(searchParams.get("maxPrice") || "");
   }, [searchParams]);
 
   const handleSearchQuery = (query: string, value: string | number) => {
@@ -71,11 +69,30 @@ export default function FilterSidebar() {
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
+  const handlePriceChange = (type: "minPrice" | "maxPrice", val: string) => {
+    if (type === "minPrice") {
+      setMinPrice(val);
+      if (val) {
+        handleSearchQuery("minPrice", val);
+      } else {
+        removeSearchQuery("minPrice");
+      }
+    } else {
+      setMaxPrice(val);
+      if (val) {
+        handleSearchQuery("maxPrice", val);
+      } else {
+        removeSearchQuery("maxPrice");
+      }
+    }
+  };
+
   const clearAllFilters = () => {
     router.push(`${pathname}`, { scroll: false });
   };
 
   const currentCategory = searchParams.get("category") || "";
+  const selectedCategories = currentCategory ? currentCategory.split(",") : [];
   const currentBrand = searchParams.get("brand") || "";
   const currentRating = searchParams.get("rating") || "";
   const isInStock = searchParams.get("inStock") === "true";
@@ -96,24 +113,26 @@ export default function FilterSidebar() {
         )}
       </div>
 
-      {/* Filter by Price */}
+      {/* Filter by Price Range */}
       <div className="space-y-3">
-        <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Price Limit</h3>
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>$0</span>
-          <span>$500,000</span>
+        <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Price Range</h3>
+        <div className="flex items-center gap-2">
+          <Input
+            type="number"
+            placeholder="Min Price"
+            value={minPrice}
+            onChange={(e) => handlePriceChange("minPrice", e.target.value)}
+            className="rounded-xl h-9"
+          />
+          <span className="text-muted-foreground text-xs">—</span>
+          <Input
+            type="number"
+            placeholder="Max Price"
+            value={maxPrice}
+            onChange={(e) => handlePriceChange("maxPrice", e.target.value)}
+            className="rounded-xl h-9"
+          />
         </div>
-        <Slider
-          max={500000}
-          step={100}
-          value={price}
-          onValueChange={(value) => {
-            setPrice(value);
-            handleSearchQuery("maxPrice", value[0]);
-          }}
-          className="w-full"
-        />
-        <p className="text-xs font-semibold">Max Price: ${price[0].toLocaleString()}</p>
       </div>
 
       {/* In Stock Toggle */}
@@ -145,10 +164,16 @@ export default function FilterSidebar() {
               <div key={category._id} className="flex items-center space-x-2.5">
                 <Checkbox
                   id={`cat-${category._id}`}
-                  checked={currentCategory === category._id}
+                  checked={selectedCategories.includes(category._id)}
                   onCheckedChange={(checked) => {
+                    let updated: string[];
                     if (checked) {
-                      handleSearchQuery("category", category._id);
+                      updated = [...selectedCategories, category._id];
+                    } else {
+                      updated = selectedCategories.filter((id) => id !== category._id);
+                    }
+                    if (updated.length > 0) {
+                      handleSearchQuery("category", updated.join(","));
                     } else {
                       removeSearchQuery("category");
                     }

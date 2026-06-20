@@ -4,12 +4,17 @@ import { Button } from "@/components/ui/button";
 import { IProduct } from "@/types/product";
 import { Star, ShoppingCart, Heart, Plus, Minus, Store } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { addProduct } from "@/redux/featurs/cartSlice";
 import { useAppDispatch } from "@/redux/hooks";
 import { toast } from "sonner";
 import useEmblaCarousel from "embla-carousel-react";
 import ProductCard from "@/components/ui/core/ProductCard";
+import { useUser } from "@/context/UserContext";
+import { useWishlist } from "@/hooks/useWishlist";
+import { getMyOrders } from "@/services/order";
+import { createReview } from "@/services/review";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ProductDetailsProps {
   product: IProduct & { reviews?: any[] };
@@ -18,15 +23,94 @@ interface ProductDetailsProps {
 
 export default function ProductDetails({ product, relatedProducts = [] }: ProductDetailsProps) {
   const dispatch = useAppDispatch();
+  const { user } = useUser();
+  const { isWishlisted, toggleWishlist } = useWishlist();
+
   const [activeImage, setActiveImage] = useState(product?.imageUrls?.[0] || "");
   const [quantity, setQuantity] = useState(1);
+
+  const [isEligible, setIsEligible] = useState(false);
+  const [reviewsList, setReviewsList] = useState<any[]>(product?.reviews || []);
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   // Embla for related products
   const [emblaRef] = useEmblaCarousel({ align: "start", dragFree: true });
 
+  const wishlisted = isWishlisted(product?._id);
+
+  useEffect(() => {
+    const checkEligibility = async () => {
+      if (!user) return;
+      try {
+        const res = await getMyOrders({ limit: 100 });
+        const orders = res?.result || res?.data || [];
+        if (Array.isArray(orders)) {
+          // Check completed orders with matching product id
+          const hasPurchased = orders.some((order: any) => {
+            const isCompleted = ["Completed", "Delivered"].includes(order.status);
+            if (!isCompleted) return false;
+            return order.products?.some((p: any) => {
+              const prodId = p.product?._id || p.product;
+              return prodId === product._id;
+            });
+          });
+          setIsEligible(hasPurchased);
+        }
+      } catch (err) {
+        console.error("Error checking review eligibility:", err);
+      }
+    };
+    checkEligibility();
+  }, [user, product._id]);
+
   const handleAddToCart = () => {
     dispatch(addProduct({ product, quantity }));
     toast.success(`Added ${quantity} item(s) of "${product.name}" to cart.`);
+  };
+
+  const handleWishlistToggle = async () => {
+    await toggleWishlist(product._id);
+  };
+
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!comment || comment.trim().length < 10) {
+      toast.error("Please enter a review comment of at least 10 characters.");
+      return;
+    }
+    setSubmittingReview(true);
+    try {
+      const res = await createReview({
+        product: product._id,
+        rating,
+        comment,
+      });
+      if (res?.success) {
+        toast.success("Review submitted successfully!");
+        setComment("");
+        setRating(5);
+        setReviewsList((prev) => [
+          ...prev,
+          {
+            _id: res.data?._id || Math.random().toString(),
+            user: { name: user?.name || "Customer" },
+            rating,
+            comment,
+            createdAt: new Date().toISOString(),
+          },
+        ]);
+        setIsEligible(false);
+      } else {
+        toast.error(res?.message || "Failed to submit review.");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("An error occurred while submitting review.");
+    } finally {
+      setSubmittingReview(false);
+    }
   };
 
   const incrementQty = () => {
@@ -44,7 +128,7 @@ export default function ProductDetails({ product, relatedProducts = [] }: Produc
   };
 
   const ratingValue = product.averageRating || 0;
-  const ratingCount = product.ratingCount || 0;
+  const ratingCount = reviewsList.length || product.ratingCount || 0;
 
   return (
     <div className="space-y-12 my-10">
@@ -176,11 +260,14 @@ export default function ProductDetails({ product, relatedProducts = [] }: Produc
                 <ShoppingCart className="w-5 h-5" /> Add to Cart
               </Button>
               <Button
+                onClick={handleWishlistToggle}
                 variant="outline"
-                className="rounded-full p-6 text-muted-foreground"
-                aria-label="Add to wishlist"
+                className={`rounded-full p-6 transition ${
+                  wishlisted ? "border-red-200 bg-red-50 text-red-500 hover:bg-red-100 dark:bg-red-950/40" : "text-muted-foreground"
+                }`}
+                aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
               >
-                <Heart className="w-5 h-5" />
+                <Heart className={`w-5 h-5 ${wishlisted ? "fill-red-500 text-red-500" : ""}`} />
               </Button>
             </div>
           </div>
@@ -214,11 +301,12 @@ export default function ProductDetails({ product, relatedProducts = [] }: Produc
       )}
 
       {/* 3. Reviews List */}
-      <div className="bg-card border border-border/60 rounded-3xl p-6 md:p-8">
-        <h2 className="text-xl font-bold mb-6">Customer Reviews</h2>
-        {product?.reviews && product.reviews.length > 0 ? (
+      <div className="bg-card border border-border/60 rounded-3xl p-6 md:p-8 space-y-8">
+        <h2 className="text-xl font-bold">Customer Reviews</h2>
+        
+        {reviewsList.length > 0 ? (
           <div className="space-y-6">
-            {product.reviews.map((rev, idx) => (
+            {reviewsList.map((rev, idx) => (
               <div key={idx} className="border-b pb-4 last:border-b-0 last:pb-0 space-y-2">
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
@@ -255,6 +343,51 @@ export default function ProductDetails({ product, relatedProducts = [] }: Produc
           <p className="text-sm text-muted-foreground text-center py-6">
             No reviews yet. Be the first to review this product!
           </p>
+        )}
+
+        {/* 3a. Write a Review Form */}
+        {isEligible && (
+          <div className="border-t pt-6 space-y-4">
+            <h3 className="text-lg font-bold">Write a Review</h3>
+            <form onSubmit={handleReviewSubmit} className="space-y-4">
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-semibold text-muted-foreground">Rating:</span>
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setRating(star)}
+                      className="text-yellow-400 hover:scale-110 transition"
+                    >
+                      <Star
+                        className={`w-6 h-6 ${
+                          star <= rating
+                            ? "fill-yellow-400 text-yellow-400"
+                            : "text-slate-300 dark:text-slate-700"
+                        }`}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-1">
+                <Textarea
+                  placeholder="Share your experience with this product (min 10 characters)..."
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  className="rounded-2xl border-border/80 min-h-24"
+                />
+              </div>
+              <Button
+                type="submit"
+                disabled={submittingReview}
+                className="rounded-full px-6 font-bold"
+              >
+                {submittingReview ? "Submitting..." : "Submit Review"}
+              </Button>
+            </form>
+          </div>
         )}
       </div>
 

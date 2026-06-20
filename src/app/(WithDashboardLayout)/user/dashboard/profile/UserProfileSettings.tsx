@@ -21,6 +21,7 @@ import { changePassword } from "@/services/AuthService";
 import { useState } from "react";
 import Image from "next/image";
 import { User, KeyRound, UploadCloud } from "lucide-react";
+import { cities } from "@/contants/cities";
 
 // 1. Profile Validation Schema
 const profileSchema = z.object({
@@ -31,6 +32,7 @@ const profileSchema = z.object({
   gender: z.enum(["Male", "Female", "Other"]),
   dateOfBirth: z.string().optional(),
   address: z.string().optional(),
+  city: z.string().optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -66,6 +68,7 @@ export default function UserProfileSettings({ userProfile }: UserProfileSettings
       gender: profileData.gender || "Other",
       dateOfBirth: profileData.dateOfBirth ? new Date(profileData.dateOfBirth).toISOString().split("T")[0] : "",
       address: profileData.address || "",
+      city: profileData.city || "",
     },
   });
 
@@ -87,6 +90,7 @@ export default function UserProfileSettings({ userProfile }: UserProfileSettings
       const payload: Record<string, any> = {
         gender: data.gender,
         address: data.address || "",
+        city: data.city || "",
       };
       
       if (data.phoneNo) {
@@ -249,20 +253,48 @@ export default function UserProfileSettings({ userProfile }: UserProfileSettings
               />
             </div>
 
-            {/* Address */}
-            <FormField
-              control={profileForm.control}
-              name="address"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Address</FormLabel>
-                  <FormControl>
-                    <Input placeholder="123 Gulshan St, Dhaka" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* City selector */}
+              <FormField
+                control={profileForm.control}
+                name="city"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>City</FormLabel>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger className="rounded-xl">
+                          <SelectValue placeholder="Select City" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {cities.map((city) => (
+                          <SelectItem key={city} value={city}>
+                            {city}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Address */}
+              <FormField
+                control={profileForm.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Address</FormLabel>
+                    <FormControl>
+                      <Input placeholder="123 Gulshan St, Dhaka" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <Button
               type="submit"
