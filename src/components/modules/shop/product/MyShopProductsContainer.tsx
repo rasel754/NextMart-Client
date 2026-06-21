@@ -256,6 +256,7 @@ export default function MyShopProductsContainer() {
           router.push(`${pathname}?${params.toString()}`, { scroll: false });
         }}
         searchPlaceholder="Search products by title..."
+        defaultSearchValue={searchVal}
       />
 
       <ConfirmModal

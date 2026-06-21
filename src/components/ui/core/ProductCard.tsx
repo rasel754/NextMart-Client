@@ -15,6 +15,7 @@ import { Heart, ShoppingCart, Star, Eye } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";
+import { OfficialBadge } from "@/components/ui/core/OfficialBadge";
 
 interface ProductCardProps {
   product: IProduct;
@@ -47,6 +48,9 @@ export default function ProductCard({ product }: ProductCardProps) {
     <Card className="group relative flex flex-col h-full rounded-2xl overflow-hidden border border-border/60 bg-card hover:shadow-lg transition-all duration-300">
       {/* Absolute Badges */}
       <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5">
+        {product.shop?.isOfficial && (
+          <OfficialBadge />
+        )}
         {isDiscounted && (
           <span className="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider bg-red-500 text-white rounded-full shadow-sm">
             {discountPercent}% OFF

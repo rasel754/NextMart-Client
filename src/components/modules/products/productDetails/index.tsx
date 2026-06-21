@@ -2,8 +2,9 @@
 
 import { Button } from "@/components/ui/button";
 import { IProduct } from "@/types/product";
-import { Star, ShoppingCart, Heart, Plus, Minus, Store } from "lucide-react";
+import { Star, ShoppingCart, Heart, Plus, Minus, Store, BadgeCheck } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useState, useEffect } from "react";
 import { addProduct } from "@/redux/featurs/cartSlice";
 import { useAppDispatch } from "@/redux/hooks";
@@ -278,7 +279,15 @@ export default function ProductDetails({ product, relatedProducts = [] }: Produc
               <Store className="w-5 h-5 text-primary shrink-0" />
               <div>
                 <p className="text-xs font-semibold text-muted-foreground">Sold By</p>
-                <h4 className="font-bold text-foreground">{product.shop.shopName}</h4>
+                {product.shop.isOfficial ? (
+                  <h4 className="font-bold text-blue-600 inline-flex items-center gap-1">
+                    NextMart Official Store <BadgeCheck className="w-4 h-4 text-blue-600" />
+                  </h4>
+                ) : (
+                  <Link href={`/shop/${product.shop._id}`} className="font-bold text-foreground hover:underline">
+                    {product.shop.shopName}
+                  </Link>
+                )}
               </div>
             </div>
           )}

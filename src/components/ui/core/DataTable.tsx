@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   ColumnDef,
   flexRender,
@@ -32,6 +32,7 @@ interface DataTableProps<T> {
   onPageChange: (page: number) => void;
   onSearch?: (value: string) => void;
   filterSlot?: React.ReactNode;
+  defaultSearchValue?: string;
 }
 
 export function DataTable<T>({
@@ -45,8 +46,9 @@ export function DataTable<T>({
   onPageChange,
   onSearch,
   filterSlot,
+  defaultSearchValue = "",
 }: DataTableProps<T>) {
-  const [searchValue, setSearchValue] = useState("");
+  const [searchValue, setSearchValue] = useState(defaultSearchValue);
 
   const table = useReactTable({
     data,
@@ -54,15 +56,32 @@ export function DataTable<T>({
     getCoreRowModel: getCoreRowModel(),
   });
 
+  // Sync state if prop changes
+  useEffect(() => {
+    setSearchValue(defaultSearchValue);
+  }, [defaultSearchValue]);
+
+  // Store onSearch in a ref to avoid dependency changes triggering effect
+  const onSearchRef = useRef(onSearch);
+  useEffect(() => {
+    onSearchRef.current = onSearch;
+  }, [onSearch]);
+
   // Debounced search logic (400ms)
   useEffect(() => {
-    if (!onSearch) return;
+    if (!onSearchRef.current) return;
+
+    // Skip if search value is same as the prop value
+    if (searchValue === defaultSearchValue) {
+      return;
+    }
+
     const delayDebounce = setTimeout(() => {
-      onSearch(searchValue);
+      onSearchRef.current?.(searchValue);
     }, 400);
 
     return () => clearTimeout(delayDebounce);
-  }, [searchValue, onSearch]);
+  }, [searchValue, defaultSearchValue]);
 
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 

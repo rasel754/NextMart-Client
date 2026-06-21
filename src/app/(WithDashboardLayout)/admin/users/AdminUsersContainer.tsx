@@ -128,6 +128,7 @@ export default function AdminUsersContainer({
   const currentRole = searchParams.get("role") || "all";
   const currentStatus = searchParams.get("status") || "all";
   const currentPage = meta?.page || 1;
+  const searchVal = searchParams.get("search") || "";
 
   // Columns definition for DataTable
   const columns: ColumnDef<any>[] = [
@@ -330,6 +331,7 @@ export default function AdminUsersContainer({
         }}
         searchPlaceholder="Search by name or email..."
         filterSlot={filters}
+        defaultSearchValue={searchVal}
       />
 
       <ConfirmModal

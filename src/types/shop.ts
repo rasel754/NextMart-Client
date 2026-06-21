@@ -12,6 +12,7 @@ export interface IShop {
   socialMediaLinks?: Record<string, string> | null;
   taxIdentificationNumber: string;
   logo?: string | null;
+  isOfficial?: boolean;
   isActive: boolean;
   createdAt?: string;
   updatedAt?: string;

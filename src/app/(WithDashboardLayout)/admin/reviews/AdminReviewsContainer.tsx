@@ -70,6 +70,7 @@ export default function AdminReviewsContainer({
   };
 
   const currentPage = meta?.page || 1;
+  const searchVal = searchParams.get("search") || "";
 
   // Star rating helper
   const renderStars = (rating: number) => {
@@ -211,6 +212,7 @@ export default function AdminReviewsContainer({
           router.push(`${pathname}?${params.toString()}`, { scroll: false });
         }}
         searchPlaceholder="Search reviews by user..."
+        defaultSearchValue={searchVal}
       />
 
       <ConfirmModal

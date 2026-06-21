@@ -106,6 +106,7 @@ export default function AdminOrdersContainer({
 
   const currentStatus = searchParams.get("status") || "all";
   const currentPage = meta?.page || 1;
+  const searchVal = searchParams.get("search") || "";
 
   // Columns definition for DataTable
   const columns: ColumnDef<any>[] = [
@@ -267,6 +268,7 @@ export default function AdminOrdersContainer({
         }}
         searchPlaceholder="Search orders by customer email..."
         filterSlot={filters}
+        defaultSearchValue={searchVal}
       />
 
       {/* Details View Modal */}

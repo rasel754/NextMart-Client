@@ -21,6 +21,7 @@ type Specification = {
     shop: {
       _id: string;
       shopName: string;
+      isOfficial?: boolean;
     };
     brand: {
       _id: string;

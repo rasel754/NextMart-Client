@@ -14,13 +14,12 @@ import { ConfirmModal } from "@/components/ui/core/ConfirmModal";
 import { IMeta } from "@/types/meta";
 import Image from "next/image";
 import ProductFormDialog from "./ProductFormDialog";
-
+import { OfficialBadge } from "@/components/ui/core/OfficialBadge";
 interface AdminProductsContainerProps {
   initialProducts: any[];
   meta: IMeta | null;
   categories: any[];
   brands: any[];
-  shops: any[];
 }
 
 export default function AdminProductsContainer({
@@ -28,7 +27,6 @@ export default function AdminProductsContainer({
   meta,
   categories = [],
   brands = [],
-  shops = [],
 }: AdminProductsContainerProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -82,6 +80,7 @@ export default function AdminProductsContainer({
   const currentCategory = searchParams.get("category") || "all";
   const currentBrand = searchParams.get("brand") || "all";
   const currentPage = meta?.page || 1;
+  const searchVal = searchParams.get("search") || "";
 
   // Table Columns
   const columns: ColumnDef<any>[] = [
@@ -129,6 +128,20 @@ export default function AdminProductsContainer({
           {row.original.brand?.name || "N/A"}
         </span>
       ),
+    },
+    {
+      id: "soldBy",
+      header: "Sold By",
+      cell: ({ row }) => {
+        const product = row.original;
+        return product.shop?.isOfficial ? (
+          <OfficialBadge />
+        ) : (
+          <span className="text-xs text-muted-foreground font-semibold">
+            {product.shop?.shopName || "Unknown Vendor"}
+          </span>
+        );
+      },
     },
     {
       accessorKey: "price",
@@ -301,6 +314,7 @@ export default function AdminProductsContainer({
         }}
         searchPlaceholder="Search products by title..."
         filterSlot={filters}
+        defaultSearchValue={searchVal}
       />
 
       <ConfirmModal
@@ -326,7 +340,6 @@ export default function AdminProductsContainer({
         }}
         categories={categories}
         brands={brands}
-        shops={shops}
         productToEdit={editProduct}
         onSuccess={() => {
           router.refresh();

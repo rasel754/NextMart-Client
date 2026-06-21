@@ -43,20 +43,18 @@ const productSchema = z.object({
   weight: z.preprocess((val) => (val === "" ? null : Number(val)), z.number().min(0).nullable().optional()),
   category: z.string().min(1, "Please select a category"),
   brand: z.string().min(1, "Please select a brand"),
-  shop: z.string().min(1, "Please select a shop"),
+  shop: z.string().optional(),
   availableColors: z.array(z.object({ value: z.string() })).optional(),
   keyFeatures: z.array(z.object({ value: z.string() })).optional(),
   specification: z.array(z.object({ key: z.string(), value: z.string() })).optional(),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
-
 interface ProductFormDialogProps {
   isOpen: boolean;
   onClose: () => void;
   categories: any[];
   brands: any[];
-  shops: any[];
   productToEdit?: any | null;
   onSuccess: () => void;
 }
@@ -66,7 +64,6 @@ export default function ProductFormDialog({
   onClose,
   categories = [],
   brands = [],
-  shops = [],
   productToEdit = null,
   onSuccess,
 }: ProductFormDialogProps) {
@@ -341,31 +338,6 @@ export default function ProductFormDialog({
                 )}
               />
 
-              {/* Shop selection (Required for Admin to allocate product) */}
-              <FormField
-                control={form.control}
-                name="shop"
-                render={({ field }) => (
-                  <FormItem className="md:col-span-2">
-                    <FormLabel className="text-xs font-bold">Assign to Shop *</FormLabel>
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <FormControl>
-                        <SelectTrigger className="h-9 rounded-xl text-xs">
-                          <SelectValue placeholder="Select Merchant Shop" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {shops.map((s) => (
-                          <SelectItem key={s._id} value={s._id} className="text-xs">
-                            {s.shopName || s.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage className="text-[10px]" />
-                  </FormItem>
-                )}
-              />
             </div>
 
             {/* Description */}

@@ -94,6 +94,7 @@ export default function AdminShopsContainer({
   };
 
   const currentPage = meta?.page || 1;
+  const searchVal = searchParams.get("search") || "";
 
   // Columns definition
   const columns: ColumnDef<any>[] = [
@@ -201,7 +202,11 @@ export default function AdminShopsContainer({
             </Button>
 
             {/* Suspend / Activate toggle */}
-            {isActive ? (
+            {s.isOfficial ? (
+              <Badge variant="secondary" className="bg-slate-100 text-slate-500 font-bold border-transparent text-[10px] select-none h-8 flex items-center px-3">
+                Protected System Store
+              </Badge>
+            ) : isActive ? (
               <Button
                 variant="outline"
                 size="sm"
@@ -226,15 +231,17 @@ export default function AdminShopsContainer({
             )}
 
             {/* Delete Shop */}
-            <Button
-              variant="outline"
-              size="icon"
-              disabled={isSelfLoading || loadingDeleteId === s._id}
-              className="h-8 w-8 rounded-full border-red-500/10 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
-              onClick={() => triggerDeleteConfirm(s)}
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-            </Button>
+            {!s.isOfficial && (
+              <Button
+                variant="outline"
+                size="icon"
+                disabled={isSelfLoading || loadingDeleteId === s._id}
+                className="h-8 w-8 rounded-full border-red-500/10 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
+                onClick={() => triggerDeleteConfirm(s)}
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </Button>
+            )}
           </div>
         );
       },
@@ -272,6 +279,7 @@ export default function AdminShopsContainer({
           router.push(`${pathname}?${params.toString()}`, { scroll: false });
         }}
         searchPlaceholder="Search shops by name..."
+        defaultSearchValue={searchVal}
       />
 
       <ConfirmModal

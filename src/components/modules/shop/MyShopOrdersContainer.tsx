@@ -241,6 +241,7 @@ export default function MyShopOrdersContainer() {
         }}
         searchPlaceholder="Search by Order ID..."
         filterSlot={filters}
+        defaultSearchValue={searchVal}
       />
 
       {/* Details View Modal */}
