@@ -30,7 +30,7 @@ import Logo from "@/assets/svgs/Logo";
 import { useUser } from "@/context/UserContext";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { user } = useUser();
+  const { user, shopInfo } = useUser();
   const role = user?.role || "user";
 
   const adminMenu = [
@@ -114,7 +114,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     },
   ];
 
-  const menuItems = role === "admin" ? adminMenu : userMenu;
+  const finalUserMenu = shopInfo
+    ? [
+        userMenu[0],
+        {
+          title: "My Shop",
+          url: "/user/my-shop",
+          icon: Store,
+        },
+        ...userMenu.slice(1),
+      ]
+    : userMenu;
+
+  const menuItems = role === "admin" ? adminMenu : finalUserMenu;
 
   return (
     <Sidebar collapsible="icon" {...props}>

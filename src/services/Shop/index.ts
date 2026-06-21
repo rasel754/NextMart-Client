@@ -76,3 +76,36 @@ export const deleteShop = async (shopId: string) => {
     return Error(error.message);
   }
 };
+
+export const getMyShop = async () => {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/shop/my-shop`, {
+      headers: {
+        Authorization: (await cookies()).get("accessToken")?.value || "",
+      },
+      next: {
+        tags: ["SHOP"],
+      },
+    });
+    if (res.status === 404) return { success: false, data: null };
+    return await res.json();
+  } catch (error: any) {
+    return Error(error.message);
+  }
+};
+
+export const updateMyShop = async (data: FormData) => {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/shop/my-shop`, {
+      method: "PATCH",
+      headers: {
+        Authorization: (await cookies()).get("accessToken")?.value || "",
+      },
+      body: data,
+    });
+    revalidateTag("SHOP");
+    return await res.json();
+  } catch (error: any) {
+    return Error(error.message);
+  }
+};

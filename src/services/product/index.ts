@@ -134,3 +134,16 @@ export const deleteProduct = async (productId: string): Promise<any> => {
     return Error(error);
   }
 };
+
+export const getMyProducts = async (query?: Record<string, string>) => {
+  try {
+    const params = new URLSearchParams(query).toString();
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/product/my-products?${params}`, {
+      headers: { Authorization: (await cookies()).get("accessToken")?.value || "" },
+      next: { tags: ["PRODUCT"] },
+    });
+    return await res.json();
+  } catch (error: any) {
+    return Error(error.message);
+  }
+};

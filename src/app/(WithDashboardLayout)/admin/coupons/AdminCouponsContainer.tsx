@@ -279,7 +279,6 @@ export default function AdminCouponsContainer({
       cell: ({ row }) => {
         const c = row.original;
         const isDeleting = loadingDeleteId === c._id;
-        const limit = c.usageLimit ?? c.limit ?? 0;
         const used = c.usageCount ?? c.used ?? 0;
         const isUsed = used > 0;
         const expiresAt = c.expiresAt;

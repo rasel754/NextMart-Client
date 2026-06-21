@@ -1,7 +1,9 @@
 "use client";
 
 import { getCurrentUser } from "@/services/AuthService";
+import { getMyShop } from "@/services/Shop";
 import { IUser } from "@/types";
+import { IShop } from "@/types/shop";
 import {
   createContext,
   Dispatch,
@@ -16,6 +18,9 @@ interface IUserProviderValues {
   isLoading: boolean;
   setUser: (user: IUser | null) => void;
   setIsLoading: Dispatch<SetStateAction<boolean>>;
+  shopInfo: IShop | null;
+  isShopLoading: boolean;
+  refetchShop: () => Promise<void>;
 }
 
 const UserContext = createContext<IUserProviderValues | undefined>(undefined);
@@ -23,6 +28,8 @@ const UserContext = createContext<IUserProviderValues | undefined>(undefined);
 const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<IUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [shopInfo, setShopInfo] = useState<IShop | null>(null);
+  const [isShopLoading, setIsShopLoading] = useState(true);
 
   const handleUser = async () => {
     const user = await getCurrentUser();
@@ -30,12 +37,43 @@ const UserProvider = ({ children }: { children: React.ReactNode }) => {
     setIsLoading(false);
   };
 
+  const handleShop = async () => {
+    if (user) {
+      setIsShopLoading(true);
+      const res = await getMyShop();
+      setShopInfo(res?.data ?? null);
+      setIsShopLoading(false);
+    } else {
+      setShopInfo(null);
+      setIsShopLoading(false);
+    }
+  };
+
+  const refetchShop = async () => {
+    const res = await getMyShop();
+    setShopInfo(res?.data ?? null);
+  };
+
   useEffect(() => {
     handleUser();
   }, [isLoading]);
 
+  useEffect(() => {
+    handleShop();
+  }, [user]);
+
   return (
-    <UserContext.Provider value={{ user, setUser, isLoading, setIsLoading }}>
+    <UserContext.Provider
+      value={{
+        user,
+        setUser,
+        isLoading,
+        setIsLoading,
+        shopInfo,
+        isShopLoading,
+        refetchShop,
+      }}
+    >
       {children}
     </UserContext.Provider>
   );
