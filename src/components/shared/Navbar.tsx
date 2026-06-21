@@ -80,8 +80,10 @@ export default function Navbar() {
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Left: Logo */}
         <Link href="/" className="flex items-center space-x-2">
-          <h1 className="text-xl md:text-2xl font-black flex items-center gap-2 text-foreground">
-            <Logo /> Next Mart
+          <h1 className="text-xl md:text-2xl font-black flex items-center gap-1.5 text-foreground">
+            <Logo />
+            <span className="text-[#3b49df] dark:text-[#5865f2]">Next</span>
+            <span className="text-[#10b981]">Mart</span>
           </h1>
         </Link>
 

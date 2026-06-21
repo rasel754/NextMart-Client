@@ -31,9 +31,10 @@ const Footer = () => {
           {/* Column 1: Brand & Tagline */}
           <div className="space-y-4">
             <Link href="/" className="flex items-center space-x-2">
-              <h1 className="text-2xl font-black flex items-center gap-2">
+              <h1 className="text-2xl font-black flex items-center gap-1.5">
                 <Logo />
-                Next Mart
+                <span className="text-[#3b49df] dark:text-[#5865f2]">Next</span>
+                <span className="text-[#10b981]">Mart</span>
               </h1>
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed">

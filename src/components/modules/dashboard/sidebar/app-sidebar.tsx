@@ -139,7 +139,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <Logo />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <h2 className="font-bold text-xl">NextMart</h2>
+                  <h2 className="font-black text-xl">
+                    <span className="text-[#3b49df] dark:text-[#5865f2]">Next</span>
+                    <span className="text-[#10b981]">Mart</span>
+                  </h2>
                 </div>
               </Link>
             </SidebarMenuButton>
