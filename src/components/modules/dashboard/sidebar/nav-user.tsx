@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { ChevronsUpDown, LogOut } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -20,13 +21,33 @@ import { useUser } from "@/context/UserContext";
 import { usePathname, useRouter } from "next/navigation";
 import { logout } from "@/services/AuthService";
 import { protectedRoutes } from "@/contants";
+import { getMyProfile } from "@/services/user";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
   const { user, setIsLoading } = useUser();
+  const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
 
   const router = useRouter();
   const pathname = usePathname();
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await getMyProfile();
+        if (res?.success && res.data?.profile?.photo) {
+          setProfilePhoto(res.data.profile.photo);
+        }
+      } catch (err) {
+        console.error("Failed to load profile photo in sidebar:", err);
+      }
+    };
+    if (user) {
+      fetchProfile();
+    } else {
+      setProfilePhoto(null);
+    }
+  }, [user]);
 
   const handleLogout = () => {
     logout();
@@ -47,9 +68,9 @@ export function NavUser() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage alt={user?.name} />
-                <AvatarFallback className="rounded-lg">
-                  {user?.role}
+                <AvatarImage src={profilePhoto || ""} alt={user?.name || "User"} />
+                <AvatarFallback className="rounded-lg bg-primary/10 text-primary font-bold">
+                  {user?.name ? user.name.slice(0, 2).toUpperCase() : "US"}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
@@ -68,9 +89,9 @@ export function NavUser() {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage alt={user?.name} />
-                  <AvatarFallback className="rounded-lg">
-                    {user?.role}
+                  <AvatarImage src={profilePhoto || ""} alt={user?.name || "User"} />
+                  <AvatarFallback className="rounded-lg bg-primary/10 text-primary font-bold">
+                    {user?.name ? user.name.slice(0, 2).toUpperCase() : "US"}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
@@ -79,14 +100,14 @@ export function NavUser() {
                 </div>
               </div>
             </DropdownMenuLabel>
-
-            <DropdownMenuItem onClick={() => handleLogout()}>
-              <LogOut />
-              Log out
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </SidebarMenuItem>
-    </SidebarMenu>
-  );
-}
+ 
+             <DropdownMenuItem onClick={() => handleLogout()}>
+               <LogOut />
+               Log out
+             </DropdownMenuItem>
+           </DropdownMenuContent>
+         </DropdownMenu>
+       </SidebarMenuItem>
+     </SidebarMenu>
+   );
+ }

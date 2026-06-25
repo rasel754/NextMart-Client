@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "../ui/button";
-import { Heart, LogOut, ShoppingBag, Sun, Moon, Bell, Menu, X } from "lucide-react";
+import { Heart, LogOut, ShoppingBag, Sun, Moon, Menu, X } from "lucide-react";
 import Link from "next/link";
 import {
   DropdownMenu,
@@ -22,6 +22,8 @@ import { useState, useEffect } from "react";
 import { useAppSelector } from "@/redux/hooks";
 import { orderedProductsSelector } from "@/redux/featurs/cartSlice";
 import { useWishlist } from "@/hooks/useWishlist";
+import NotificationDropdown from "@/components/shared/NotificationDropdown";
+import { getMyProfile } from "@/services/user";
 
 export default function Navbar() {
   const { user, setIsLoading } = useUser();
@@ -35,10 +37,30 @@ export default function Navbar() {
   const cartProducts = useAppSelector(orderedProductsSelector);
   const cartCount = cartProducts.reduce((acc, p) => acc + p.orderedQuantity, 0);
 
+  const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
+
   // Avoid hydration mismatch by waiting until mounted
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await getMyProfile();
+        if (res?.success && res.data?.profile?.photo) {
+          setProfilePhoto(res.data.profile.photo);
+        }
+      } catch (err) {
+        console.error("Failed to load profile photo in navbar:", err);
+      }
+    };
+    if (user) {
+      fetchProfile();
+    } else {
+      setProfilePhoto(null);
+    }
+  }, [user]);
 
   const handleLogOut = () => {
     logout();
@@ -147,19 +169,14 @@ export default function Navbar() {
           </Link>
 
           {/* Notification bell */}
-          {user && (
-            <Button variant="ghost" size="icon" className="rounded-full relative">
-              <Bell className="h-5 w-5" />
-              <span className="absolute top-1 right-1 flex h-2.5 w-2.5 rounded-full bg-red-500" />
-            </Button>
-          )}
+          {user && <NotificationDropdown />}
 
           {/* Auth State Dropdown / Login */}
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger className="outline-none">
                 <Avatar className="h-9 w-9 border-2 border-primary/20 hover:border-primary transition">
-                  <AvatarImage src="https://github.com/shadcn.png" />
+                  <AvatarImage src={profilePhoto || ""} alt={user.name || "User"} />
                   <AvatarFallback className="bg-primary/10 text-primary font-bold">
                     {user.name ? user.name.slice(0, 2).toUpperCase() : "US"}
                   </AvatarFallback>

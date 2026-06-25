@@ -1,196 +1,172 @@
-# NextMart Client
+# 🛒 NextMart - Modern Multi-Vendor E-Commerce Platform
 
-[![Next.js](https://img.shields.io/badge/Next.js-15.1.6-black?style=for-the-badge&logo=next.dotjs)](https://nextjs.org/)
-[![React](https://img.shields.io/badge/React-19.0.0-blue?style=for-the-badge&logo=react)](https://react.dev/)
-[![Redux](https://img.shields.io/badge/Redux-Toolkit-purple?style=for-the-badge&logo=redux)](https://redux-toolkit.js.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS_3-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15.5-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19.0-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Redux](https://img.shields.io/badge/Redux-Toolkit-764ABC?style=for-the-badge&logo=redux&logoColor=white)](https://redux-toolkit.js.org/)
+[![Express.js](https://img.shields.io/badge/Express.js-4.21-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-8.9-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 
-NextMart Client is a high-performance, feature-rich eCommerce front-end client application built using **Next.js 15 (App Router)** and **React 19**. It features global state management powered by **Redux Toolkit** and persistent store routing via **Redux Persist**, client-side and server-side authentication using **JWT and Next.js Server Actions**, dynamic role-based routing (RBAC) middleware protection, and beautiful typography and styling with **Tailwind CSS** and **Shadcn UI**.
+NextMart is an enterprise-grade, high-performance **Multi-Vendor E-Commerce Platform** designed for seamless modern shopping. It is split into an interactive, lightning-fast client interface built with **Next.js 15 (App Router)** & **React 19**, and a robust backend API powered by **Node.js, Express, and TypeScript**. NextMart features secure role-based access controls, interactive vendor/merchant portals, real-time analytics, secure payment gateway flows, and automated invoicing.
 
 ---
 
-## 🚀 Key Features
+## 🌐 Live Deployments & Repository Links
 
-### 🛍️ Customer Experience
-- **Interactive Home Page**: Dynamic Hero section, customized Category list cards/sliders, Featured Products display, and Flash Sales highlight.
-- **Advanced Shopping Cart**: Full-featured cart system allowing users to add, increment, decrement, and remove items.
-- **Dynamic Shipping Costs**: Automatically calculates shipping charges depending on destination (Flat ৳50 inside Dhaka, ৳100 outside Dhaka).
-- **Persistent Cart State**: Cart content, shipping address, and checkout configuration are stored and rehydrated across reloads using Redux Persist.
-- **Secure Checkout**: Seamless order creation integrated with backend Order APIs.
+| Component | Live Link | Repository |
+| :--- | :--- | :--- |
+| **Frontend Client** | [next-mart-client-sable.vercel.app](https://next-mart-client-sable.vercel.app/) | [GitHub Repository](https://github.com/rasel754/NextMart-Client) |
+| **Backend Server** | [next-mart-server-taupe.vercel.app](https://next-mart-server-taupe.vercel.app/) | [GitHub Repository](https://github.com/rasel754/NextMart-Server) |
+
+📩 **Connect with Me:** [LinkedIn Profile](https://www.linkedin.com/in/rasel754)
+
+---
+
+## 🎨 Preview & Visuals
+
+> [!NOTE]
+> Enhance your user onboarding by showcasing the responsive design and beautiful visual dashboards of NextMart here.
+
+| Desktop Homepage Preview | Vendor Analytics Dashboard |
+| :---: | :---: |
+| <img src="https://i.ibb.co.com/BVL913Yg/screencapture-next-mart-client-sable-vercel-app-2026-06-25-16-08-32.png" width="100%" alt="Homepage View" style="border-radius: 8px;" /> | <img src="https://i.ibb.co.com/whHjNtQQ/screencapture-next-mart-client-sable-vercel-app-admin-2026-06-25-16-09-28.png" width="100%" alt="Dashboard Analytics" style="border-radius: 8px;" /> |
+
+---
+
+## ⚙️ Technology Stack
+
+### 💻 Frontend
+- **Framework:** Next.js 15.5 (App Router) & React 19.2
+- **State Management:** Redux Toolkit & Redux Persist (ensures persistent cart states)
+- **UI & Styling:** Tailwind CSS 3, Shadcn UI, Radix UI Primitives, Lucide Icons, and Embla Carousel
+- **Forms & Validation:** React Hook Form & Zod Schema Validation
+- **Analytics Visualization:** Recharts (interactive dashboards for merchants and administrators)
+- **Security Widgets:** React Google reCAPTCHA (client-side bot protection)
+
+### 🔌 Backend
+- **Core Environment:** Node.js & TypeScript
+- **Web Server:** Express.js
+- **Database ORM:** Mongoose ODM for MongoDB
+- **Authentication & Authorization:** Secure JWT (Access & Refresh tokens) with HttpOnly cookie persistence
+- **Payment Processing:** SSLCommerz Integration (`sslcommerz-lts`) with atomic transactions
+- **File Upload & Storage:** Multer & Cloudinary
+- **Email & Communications:** Nodemailer SMTP with responsive Handlebars (`.hbs`) templates
+- **PDF Document Engine:** PDFKit (automated payment invoice creation)
+- **Security Middleware:** Helmet, CORS, Express Mongo Sanitize, and Express Rate Limit
+
+---
+
+## ✨ Core Features & Highlights
+
+### 🛍️ Client & Customer Experience
+*   **Dynamic Landing Page:** Features high-conversion hero sliders, nested category selectors, flash sales with real-time count-down timers, and brand showcase modules.
+*   **Persistent Shopping Cart:** Powered by Redux Persist. Automatically computes cart updates, item quantities, and subtotal amounts on the fly.
+*   **Dynamic Shipping Calculator:** Automatically calculates shipping costs based on delivery address criteria (e.g., inside Dhaka vs outside Dhaka).
+*   **Secure Multi-Step Checkout:** Seamless transition from cart validation to order submission and SSLCommerz payment portal.
 
 ### 🏪 Vendor & Shop Management
-- **Vendor Onboarding**: Quick shop creation flow for verified user accounts.
-- **Complete Product Catalog Management**: CRUD dashboard allowing vendors to add and update products (including multi-image uploads via Form Data).
-- **Brand & Category Administration**: Create and delete brands or product categories directly from the vendor layout.
+*   **Vendor Onboarding:** Easily registers shops with customizable branding, descriptions, and logo uploading.
+*   **Product Inventory CRUD:** Complete inventory portal where vendors manage titles, descriptions, categories, stock, prices, flash sale tags, and image galleries.
+*   **Analytics Dashboards:** Access detailed charts (Recharts) summarizing monthly income, sales volume, top products, and overall shop performance.
 
-### 🛡️ Security & Performance
-- **Role-Based Access Control (RBAC)**: Next.js middleware dynamically monitors route protection for `user` and `admin` portals, routing users seamlessly back to login/home based on their authorization token.
-- **Server-Side Authentication**: Employs Next.js Server Actions to safely handle user registration, logins, token cookies, and session decodes.
-- **Bot Mitigation**: Google reCAPTCHA v3/v2 client-side widget verification, reinforced by server-side verification actions.
-- **On-Demand Cache Revalidation**: Uses Next.js caching tag tags (`PRODUCT`, `Brands`, `CATEGORY`) to purge and refresh pages immediately after database mutations.
-
----
-
-## 🛠️ Technical Stack
-
-- **Core Framework**: [Next.js 15.1.6](https://nextjs.org/) (App Router), [React 19](https://react.dev/)
-- **Programming Language**: [TypeScript](https://www.typescriptlang.org/)
-- **Global State Management**: [Redux Toolkit](https://redux-toolkit.js.org/) & [Redux Persist](https://github.com/rt2zz/redux-persist)
-- **Styling & Theme**: [Tailwind CSS](https://tailwindcss.com/), [PostCSS](https://postcss.org/), [tailwindcss-animate](https://github.com/jamiebuilds/tailwindcss-animate)
-- **UI Components**: [Shadcn UI](https://ui.shadcn.com/) (built on [Radix UI](https://www.radix-ui.com/) primitives)
-- **Icons**: [Lucide React](https://lucide.dev/)
-- **Form Handling & Validation**: [React Hook Form](https://react-hook-form.com/) & [Zod Schema Validation](https://zod.dev/)
-- **Notifications**: [Sonner](https://ryabchikov.it/sonner/) Toast Manager
-- **Auth Utils**: [jwt-decode](https://github.com/auth0/jwt-decode)
-- **Security Check**: [React Google reCAPTCHA](https://github.com/dozoisch/react-google-recaptcha)
+### 🛡️ Security, Auditing & Performance
+*   **Role-Based Access Control (RBAC):** Middleware checks verify permissions for Customers, Vendors, and Administrators.
+*   **Bot Prevention:** Integrates Google reCAPTCHA verification on login and registration portals.
+*   **Request & Browser Auditing:** Uses UAParser.js to capture client IP, device models, browsers, and operating systems on authentication endpoints.
+*   **On-Demand Cache Revalidation:** Uses Next.js tag-based validation (`PRODUCT`, `Brands`, `CATEGORY`) to purge client-side cache as soon as updates occur.
 
 ---
 
-## 📂 Project Architecture
+## 📦 Main Dependencies
 
-The codebase follows a modular directory structure designed for scalability and separation of concerns:
-
+### Client
+```json
+"dependencies": {
+  "next": "^15.5.19",
+  "react": "^19.2.0",
+  "@reduxjs/toolkit": "^2.8.2",
+  "redux-persist": "^6.0.0",
+  "tailwind-merge": "^2.6.0",
+  "tailwindcss-animate": "^1.0.7",
+  "zod": "^3.24.1",
+  "react-hook-form": "^7.54.2",
+  "@hookform/resolvers": "^3.10.0",
+  "react-google-recaptcha": "^3.1.0",
+  "lucide-react": "^0.474.0",
+  "sonner": "^1.7.2",
+  "recharts": "^3.8.1",
+  "embla-carousel-react": "^8.6.0"
+}
 ```
-NextMart-Client/
-├── src/
-│   ├── app/                      # Next.js App Router (Layouts & Pages)
-│   │   ├── (WithCommonLayout)/   # Routes with common Header & Footer (Home, Cart, Products, Shop Creation)
-│   │   ├── (WithDashboardLayout)/# Protected Admin and User/Vendor dashboards
-│   │   ├── login/                # User login page
-│   │   ├── register/             # User registration page
-│   │   ├── success/              # Order checkout success landing page
-│   │   └── globals.css           # Global CSS variables & styles
-│   ├── assets/                   # Static assets (images, logos, etc.)
-│   ├── components/               # React components
-│   │   ├── modules/              # Feature-specific modules (auth, cart, home, products, shop)
-│   │   ├── shared/               # Shared components (Header, Footer, Navbar, Sidebar)
-│   │   └── ui/                   # Reusable UI primitives (Shadcn components & custom wrappers)
-│   │       └── core/             # Custom tables, modals, image uploaders, and cards
-│   ├── contants/                 # Application-wide static data (cities list, protected routes)
-│   ├── context/                  # React Contexts (User session provider and custom hooks)
-│   ├── hooks/                    # Reusable React hooks
-│   ├── lib/                      # External library client instances & utility functions
-│   ├── middleware.ts             # Route verification & role-based redirection middleware
-│   ├── providers/                # Client-side Wrapper Providers (Redux, PersistGate, Context Providers)
-│   ├── redux/                    # Redux Toolkit configuration (store, slices, persistence settings)
-│   ├── services/                 # Next.js Server Actions (Auth, Product, Brand, Category, Order, FlashSale)
-│   └── types/                    # TypeScript interfaces & custom type definitions
-├── components.json               # Shadcn UI CLI configuration
-├── tailwind.config.ts            # Tailwind CSS custom themes & animations
-├── tsconfig.json                 # TypeScript compiler configuration
-└── package.json                  # Dependencies & npm scripts
+
+### Server
+```json
+"dependencies": {
+  "express": "^4.21.2",
+  "mongoose": "^8.9.5",
+  "jsonwebtoken": "^9.0.2",
+  "bcrypt": "^5.1.1",
+  "zod": "^3.24.1",
+  "sslcommerz-lts": "^1.1.0",
+  "nodemailer": "^6.9.16",
+  "pdfkit": "^0.16.0",
+  "cloudinary": "^1.30.0",
+  "multer": "^1.4.5-lts.1",
+  "node-cron": "^4.4.1",
+  "winston": "^3.19.0"
+}
 ```
 
 ---
 
-## ⚙️ Environment Configuration
+## 🚀 Run Locally
 
-Create a `.env` or `.env.local` file in the root directory of the project and specify the following variables:
+Ensure you have [Node.js v20+](https://nodejs.org/) and [MongoDB](https://www.mongodb.com/) installed on your machine.
 
-```env
-# The URL endpoint of the NextMart Express/Nest Backend Server
-NEXT_PUBLIC_BASE_API=http://localhost:5000/api/v1
+### Setup Backend Server
+1. Clone the repository and navigate to the server folder:
+   ```bash
+   git clone https://github.com/rasel754/NextMart-Server.git
+   cd NextMart-Server
+   ```
+2. Install the server-side dependencies:
+   ```bash
+   npm install
+   ```
+3. Set up your `.env` configuration. Copy `.env.example` to `.env` and fill in the credentials:
+   ```bash
+   cp .env.example .env
+   ```
+4. Run the local backend server:
+   ```bash
+   npm run dev
+   ```
+   *The server runs locally at `http://localhost:3001` (or your customized port).*
 
-# Google reCAPTCHA site credentials for bot protection
-NEXT_PUBLIC_RECAPTCHA_CLIENT_KEY=your_recaptcha_site_key
-NEXT_PUBLIC_RECAPTCHA_SERVER_KEY=your_recaptcha_secret_key
-```
-
----
-
-## 🛠️ Installation & Setup
-
-Follow these steps to run the client application locally:
-
-### 1. Clone the Repository
-```bash
-git clone https://github.com/rasel754/NextMart-Client.git
-cd NextMart-Client
-```
-
-### 2. Install Dependencies
-Make sure you have [Node.js](https://nodejs.org/) (v18+ recommended) installed. Run:
-```bash
-npm install
-```
-
-### 3. Run Development Server
-```bash
-npm run dev
-```
-Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
-
-### 4. Build for Production
-To build the application for optimal production deployment:
-```bash
-npm run build
-```
-
-### 5. Start Production Server
-```bash
-npm run start
-```
-
-### 6. Linting
-Verify code consistency and lint rules:
-```bash
-npm run lint
-```
-
----
-
-## 🧩 Architectural Highlights & API Services
-
-### 🔒 User Authentication Flow (`src/services/AuthService`)
-The client logs in users, captures their JWT token, sets it as an HTTP-only/secure cookie, and decodes the token on the server side to load details such as user ID, role, and email.
-```typescript
-// Example from src/services/AuthService/index.ts
-export const loginUser = async (userData: FieldValues) => {
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(userData),
-    });
-    const result = await res.json();
-    if (result.success) {
-      (await cookies()).set("accessToken", result.data.accessToken);
-    }
-    return result;
-  } catch (error) {
-    return Error(error);
-  }
-};
-```
-
-### 🛒 Redux State Management & Selectors (`src/redux/featurs/cartSlice.ts`)
-The client leverages RTK Selectors to compute invoice items reactively from the state. Shipping cost is determined dynamically based on the selected delivery city:
-```typescript
-export const shippingCostSelector = (state: RootState) => {
-  if (state.cart.city && state.cart.city === "Dhaka" && state.cart.products.length > 0) {
-    return 50;
-  } else if (state.cart.city && state.cart.city !== "Dhaka" && state.cart.products.length > 0) {
-    return 100;
-  } else {
-    return 0;
-  }
-};
-```
-
----
-
-## 🤝 Contributing
-
-We welcome contributions to NextMart Client! Please follow these guidelines:
-1. Fork the project.
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`).
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`).
-4. Push to the branch (`git push origin feature/AmazingFeature`).
-5. Open a Pull Request.
+### Setup Frontend Client
+1. Navigate to the client folder:
+   ```bash
+   git clone https://github.com/rasel754/NextMart-Client.git
+   cd NextMart-Client
+   ```
+2. Install the client-side dependencies:
+   ```bash
+   npm install
+   ```
+3. Create a `.env.local` file in the root of the client project:
+   ```env
+   NEXT_PUBLIC_BASE_API=http://localhost:3001/api/v1
+   NEXT_PUBLIC_RECAPTCHA_CLIENT_KEY=your_recaptcha_site_key
+   ```
+4. Run the development server:
+   ```bash
+   npm run dev
+   ```
+   *Open [http://localhost:3000](http://localhost:3000) to view the client application in your browser.*
 
 ---
 
 ## 📄 License
 
-This project is licensed under the MIT License. See the `LICENSE` file for details if available.
+Distributed under the MIT License. See `LICENSE` for more information.

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" fill="none">
+  <rect width="48" height="48" rx="12" fill="#0f172a" />
+  <g transform="translate(6, 8)">
+    <!-- Shopping bag handle -->
+    <path d="M12 12 C12 5, 24 5, 24 12" stroke="#5865f2" stroke-width="3" stroke-linecap="round" fill="none"/>
+    <!-- Blue bag body outline -->
+    <path d="M24 12 H12 V28 H24" stroke="#5865f2" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <!-- Green arrow/play body outline -->
+    <path d="M24 12 L33 20 L24 28" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  </g>
+</svg>

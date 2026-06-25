@@ -1,7 +1,80 @@
-.banner{
-    background: url("../../../../assets/product-banner.png");
-    height: 250px;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+.banner {
+  position: relative;
+  overflow: hidden;
+  height: 200px;
+  background: linear-gradient(135deg, rgba(59, 73, 223, 0.08) 0%, rgba(16, 185, 129, 0.05) 50%, rgba(59, 73, 223, 0.03) 100%);
+  border: 1px solid rgba(59, 73, 223, 0.15);
+  transition: all 0.3s ease;
 }
+
+:global(.dark) .banner {
+  background: linear-gradient(135deg, rgba(88, 101, 242, 0.12) 0%, rgba(16, 185, 129, 0.06) 50%, rgba(15, 23, 42, 0.9) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.banner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(59, 73, 223, 0.12) 1.2px, transparent 1.2px);
+  background-size: 18px 18px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+:global(.dark) .banner::before {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1.2px, transparent 1.2px);
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.25;
+  z-index: 0;
+  pointer-events: none;
+}
+
+:global(.dark) .blob {
+  opacity: 0.18;
+}
+
+.blob1 {
+  top: -30%;
+  left: -5%;
+  width: 220px;
+  height: 220px;
+  background: #3b49df;
+  animation: float1 8s infinite alternate ease-in-out;
+}
+
+:global(.dark) .blob1 {
+  background: #5865f2;
+}
+
+.blob2 {
+  bottom: -30%;
+  right: -5%;
+  width: 220px;
+  height: 220px;
+  background: #10b981;
+  animation: float2 8s infinite alternate ease-in-out;
+}
+
+@keyframes float1 {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(25px, 15px) scale(1.1);
+  }
+}
+
+@keyframes float2 {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(-25px, -15px) scale(1.1);
+  }
+}

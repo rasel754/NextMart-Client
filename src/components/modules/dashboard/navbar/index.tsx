@@ -3,7 +3,8 @@
 import React, { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
-import { Bell, Sun, Moon, LogOut, User as UserIcon, Home } from "lucide-react";
+import { Sun, Moon, LogOut, User as UserIcon, Home } from "lucide-react";
+import NotificationDropdown from "@/components/shared/NotificationDropdown";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
   DropdownMenu,
@@ -102,15 +103,8 @@ export default function DashboardNavbar() {
           </Button>
         )}
 
-        {/* Notifications Icon (static badge) */}
-        <Button
-          variant="outline"
-          size="icon"
-          className="h-9 w-9 rounded-full border hover:bg-muted/50 relative text-foreground"
-        >
-          <Bell className="h-4 w-4" />
-          <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border border-card" />
-        </Button>
+        {/* Notifications Icon (dropdown) */}
+        <NotificationDropdown triggerClass="h-9 w-9 border text-foreground hover:bg-muted/50" iconSizeClass="h-4 w-4" />
 
         {/* User Profile Dropdown */}
         <DropdownMenu>
